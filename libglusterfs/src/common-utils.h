@@ -912,7 +912,6 @@ gf_thread_cleanup_xint (pthread_t thread);
 
 ssize_t
 gf_nread (int fd, void *buf, size_t count);
-
 ssize_t
 gf_nwrite (int fd, const void *buf, size_t count);
 
@@ -930,7 +929,6 @@ gf_is_valid_xattr_namespace (char *k);
 
 const char *
 gf_inode_type_to_str (ia_type_t type);
-
 int32_t
 gf_bits_count (uint64_t n);
 
@@ -969,5 +967,8 @@ gf_replace_old_iatt_in_dict (struct _dict *);
 
 int
 gf_replace_new_iatt_in_dict (struct _dict *);
+
+int
+__is_auxilary_gfid (uuid_t);
 
 #endif /* _COMMON_UTILS_H */
