@@ -162,7 +162,7 @@ ops['readv'] = (
 	('fop-arg',	'xdata',		'dict_t *'),
 	('cbk-arg',	'vector',		'struct iovec *'),
 	('cbk-arg',	'count',		'int32_t'),
-	('cbk-arg',	'stbuf',		'struct iatt *'),
+	('cbk-arg',	'buf',		        'struct iatt *'),
 	('cbk-arg',	'iobref',		'struct iobref *'),
 	('cbk-arg',	'xdata',		'dict_t *'),
 )
@@ -187,8 +187,8 @@ ops['create'] = (
 	('cbk-arg',	'fd',			'fd_t *'),
 	('cbk-arg',	'inode',		'inode_t *'),
 	('cbk-arg',	'buf',			'struct iatt *'),
-	('cbk-arg',	'preparent',	'struct iatt *'),
-	('cbk-arg',	'postparent',	'struct iatt *'),
+	('cbk-arg',	'preparent',	        'struct iatt *'),
+	('cbk-arg',	'postparent',	        'struct iatt *'),
 	('cbk-arg',	'xdata',		'dict_t *'),
 	('journal',	'entry-op'),
 	('link',	'loc.inode',	'&iatt'),
@@ -201,8 +201,8 @@ ops['link'] = (
 	('fop-arg',	'xdata',		'dict_t *',			'xdata'),
 	('cbk-arg',	'inode',		'inode_t *'),
 	('cbk-arg',	'buf',			'struct iatt *'),
-	('cbk-arg',	'preparent',	'struct iatt *'),
-	('cbk-arg',	'postparent',	'struct iatt *'),
+	('cbk-arg',	'preparent',	        'struct iatt *'),
+	('cbk-arg',	'postparent',	        'struct iatt *'),
 	('cbk-arg',	'xdata',		'dict_t *'),
 	('journal',	'entry-op'),
 )
@@ -438,8 +438,8 @@ ops['setattr'] = (
 	('extra',	'preop',		'struct iatt',		'&preop'),
 	('extra',	'postop',		'struct iatt',		'&postop'),
 	('fop-arg',	'xdata',		'dict_t *',			'xdata'),
-	('cbk-arg',	'statpre',		'struct iatt *'),
-	('cbk-arg',	'statpost',		'struct iatt *'),
+	('cbk-arg',	'prebuf',		'struct iatt *'),
+	('cbk-arg',	'postbuf',		'struct iatt *'),
 	('cbk-arg',	'xdata',		'dict_t *'),
 	('journal',	'inode-op'),
 )
@@ -469,7 +469,7 @@ ops['lookup'] = (
 	('cbk-arg',	'xdata',		'dict_t *'),
 	# We could add xdata everywhere automatically if somebody hadn't put
 	# something after it here.
-	('cbk-arg',	'postparent',	'struct iatt *'),
+	('cbk-arg',	'postparent',	        'struct iatt *'),
 )
 
 ops['fsetattr'] = (
@@ -479,8 +479,8 @@ ops['fsetattr'] = (
 	('extra',	'preop',		'struct iatt',		'&preop'),
 	('extra',	'postop',		'struct iatt',		'&postop'),
 	('fop-arg',	'xdata',		'dict_t *',			'xdata'),
-	('cbk-arg',	'statpre',		'struct iatt *'),
-	('cbk-arg',	'statpost',		'struct iatt *'),
+	('cbk-arg',	'prebuf',		'struct iatt *'),
+	('cbk-arg',	'postbuf',		'struct iatt *'),
 	('cbk-arg',	'xdata',		'dict_t *'),
 	('journal',	'fd-op'),
 )
@@ -491,8 +491,8 @@ ops['fallocate'] = (
 	('fop-arg',	'offset',		'off_t',			'offset'),
 	('fop-arg',	'len',			'size_t',			'size'),
 	('fop-arg',	'xdata',		'dict_t *',			'xdata'),
-	('cbk-arg',	'pre',			'struct iatt *'),
-	('cbk-arg',	'post',			'struct iatt *'),
+	('cbk-arg',	'prebuf',		'struct iatt *'),
+	('cbk-arg',	'postbuf',		'struct iatt *'),
 	('cbk-arg',	'xdata',		'dict_t *'),
 	('journal',	'fd-op'),
 )
@@ -502,8 +502,8 @@ ops['discard'] = (
 	('fop-arg',	'offset',		'off_t',			'offset'),
 	('fop-arg',	'len',			'size_t',			'size'),
 	('fop-arg',	'xdata',		'dict_t *',			'xdata'),
-	('cbk-arg',	'pre',			'struct iatt *'),
-	('cbk-arg',	'post',			'struct iatt *'),
+	('cbk-arg',	'prebuf',		'struct iatt *'),
+	('cbk-arg',	'postbuf',		'struct iatt *'),
 	('cbk-arg',	'xdata',		'dict_t *'),
 	('journal',	'fd-op'),
 )
@@ -514,8 +514,8 @@ ops['zerofill'] = (
 	# As e.g. fallocate/discard (above) "len" should really be a size_t.
 	('fop-arg',	'len',			'off_t',			'size'),
 	('fop-arg',	'xdata',		'dict_t *',			'xdata'),
-	('cbk-arg',	'pre',			'struct iatt *'),
-	('cbk-arg',	'post',			'struct iatt *'),
+	('cbk-arg',	'prebuf',		'struct iatt *'),
+	('cbk-arg',	'postbuf',		'struct iatt *'),
 	('cbk-arg',	'xdata',		'dict_t *'),
 	('journal',	'fd-op'),
 )
