@@ -969,6 +969,6 @@ int
 gf_replace_new_iatt_in_dict (struct _dict *);
 
 int
-__is_auxilary_gfid (uuid_t);
+gf_is_auxilary_gfid (uuid_t);
 
 #endif /* _COMMON_UTILS_H */
