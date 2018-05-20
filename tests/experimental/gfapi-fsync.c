@@ -61,7 +61,7 @@ main (int argc, char *argv[])
         ret = glfs_write (fd1, buff, WRITE_SIZE, flags);
         VALIDATE_AND_GOTO_LABEL_ON_ERROR ("glfs_write", ret, out);
 
-        ret = glfs_fdatasync(fd1);
+        ret = glfs_fdatasync(fd1, NULL, NULL);
         VALIDATE_AND_GOTO_LABEL_ON_ERROR ("glfs_fdatasync", ret, out);
 
         ret = glfs_truncate (fs, filename, TRUNC_SIZE);
@@ -76,7 +76,7 @@ main (int argc, char *argv[])
                 ret = -1;
         }
 
-        ret = glfs_fsync(fd1);
+        ret = glfs_fsync(fd1, NULL, NULL);
         VALIDATE_AND_GOTO_LABEL_ON_ERROR ("glfs_fsync", ret, out);
 
 out:
