@@ -11,6 +11,7 @@ posix_sources += $(POSIX_SRC)/posix-handle.c
 posix_sources += $(POSIX_SRC)/posix-aio.c
 posix_sources += $(POSIX_SRC)/posix-gfid-path.c
 posix_sources += $(POSIX_SRC)/posix-inode-fd-ops.c
+posix_sources += $(POSIX_SRC)/posix-metadata.c
 
 noinst_HEADERS = $(POSIX2_PREFIX)/posix2-inode-handle.h \
                  $(POSIX2_PREFIX)/posix2-helpers.h \
@@ -20,7 +21,9 @@ noinst_HEADERS = $(POSIX2_PREFIX)/posix2-inode-handle.h \
                  $(POSIX_BLD)/posix-messages.h \
                  $(POSIX_BLD)/posix-gfid-path.h \
                  $(POSIX_BLD)/posix.h \
-                 $(POSIX_BLD)/posix-inode-handle.h
+                 $(POSIX_BLD)/posix-inode-handle.h \
+                 $(POSIX_BLD)/posix-metadata.h \
+                 $(POSIX_BLD)/posix-metadata-disk.h
 
 libposix2common_la_SOURCES = posix2-helpers.c $(posix_sources)
 

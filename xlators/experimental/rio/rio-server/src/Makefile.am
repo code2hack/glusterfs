@@ -1,5 +1,7 @@
 xlatordir = $(libdir)/glusterfs/$(PACKAGE_VERSION)/xlator/experimental
+if WITH_SERVER
 xlator_LTLIBRARIES = rios-mds.la rios-ds.la
+endif
 
 RIOSERVER_SRC = $(top_srcdir)/xlators/experimental/rio/rio-server/src
 
