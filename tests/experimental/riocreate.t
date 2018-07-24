@@ -34,3 +34,5 @@ TEST ./$(dirname $0)/gfapi-fsync $V0 $logdir/gfapi-fsync.log
 cleanup_tester $(dirname $0)/gfapi-fsync
 
 cleanup;
+
+#G_TESTDEF_TEST_STATUS_CENTOS6=KNOWN_ISSUE,BUG=github#243
