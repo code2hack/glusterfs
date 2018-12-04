@@ -3,4 +3,5 @@
 ### Main thoughts about translators ###
 >if (){
 >> else
+[see](google.com)
 
