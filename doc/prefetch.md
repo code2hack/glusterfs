@@ -3,6 +3,6 @@
 ### Main thoughts about translators ###
 1. Data structure
   * xl          : pointer to the _in-memory_ xlator
-  * xlator_fops :
+  * xlator_fops : defined in [xlator.h](https://github.com/code2hack/glusterfs/blob/doc/libglusterfs/src/xlator.h)
   * xlator_cbks :
   * 
