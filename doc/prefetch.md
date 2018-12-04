@@ -3,7 +3,7 @@
 ### Main thoughts about translators ###
 1. Backgrounds  
   * [Call Stack](https://en.wikipedia.org/wiki/Call_stack)  
-  ![](https://en.wikipedia.org/wiki/Call_stack#/media/File:Call_stack_layout.svg)  
+  ![ ](https://en.wikipedia.org/wiki/Call_stack#/media/File:Call_stack_layout.svg)  
 2. Macros
   * STACK_WIND:Adding subroutine's entry to the call stack.  
 3. Data structure
