@@ -11,7 +11,9 @@
   * xlator_fops : defined in [xlator.h](https://github.com/code2hack/glusterfs/blob/doc/libglusterfs/src/xlator.h)
     * call_frame:
       * call_stack:
-        * pool:**stack\_mem\_pool
+        * pool:
+          * stack\_mem\_pool
+          * frame\_mem\_pool
         * client:
         * state:pointer to **request state**  
         * ctime:timestamp,when to create.  
