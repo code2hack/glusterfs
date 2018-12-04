@@ -14,10 +14,10 @@
         * pool:
           * stack\_mem\_pool
           * frame\_mem\_pool
-        * client:
-        * state:pointer to **request state**  
-        * ctime:timestamp,when to create.  
-      * timespec:**begin and end**
+        * client :
+        * state  : pointer to **request state**
+        * ctime  : timestamp,when to create.
+      * timespec : **begin and end**
       * WIND and UNWIND, from and to.
   * xlator_cbks :
   * 
