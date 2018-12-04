@@ -7,7 +7,7 @@
   * xl          : pointer to the _in-memory_ xlator
   * xlator_fops : defined in [xlator.h](https://github.com/code2hack/glusterfs/blob/doc/libglusterfs/src/xlator.h)
    * call_frame:
-   * call_stack:
+   * call_stack:  
     * client:
     * state:pointer to **request state**
   * xlator_cbks :
