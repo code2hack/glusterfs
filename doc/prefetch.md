@@ -6,6 +6,7 @@
    
      [see](google.com)
 |food|water|gun|
+|-|-|-|
 |bread|cola|pistol|
 |steak|wiskey|AK47|
 
