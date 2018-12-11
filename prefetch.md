@@ -1,6 +1,6 @@
 # Development of Data Prefetching and Extensions for TIER translator #
 ## Creating/Modifying a translator to capture requests for forward analysis. ##
-### Devoloper-guide about xlators ###
+### Devoloper-guide of xlators ###
 #### Setting the Stage ####
 1. Loading translator(tag:dlsym), [xlator.c](./libglusterfs/src/xlator.c)
 
@@ -8,16 +8,19 @@
 3. dumpops
 
 #### init , fini , and private context ####
-1. init
+init  
 * Checking the translator is being set up in the right kind of environment.
   * Some translators are "initial" translators that **inject** requests into the system from elsewhere like kernel, network etc. Thus they have **no parents**.
   * Some are "final" translators(from the perspective of the current process) that they have no children.
   * Some are "multiplex" translators that they have multiple children.
 * Allocating private data area. (tag:GF_CALLOC)
-2. fini
+fini  
 free the private data.(tag:GF_FREE)
 
-### Main thoughts about translators ###
+#### Building ####
+#### Modifying volfile ####
+
+### Source codes review ###
 1. Backgrounds  
   * [Call Stack](https://en.wikipedia.org/wiki/Call_stack)  
   ![ ](https://upload.wikimedia.org/wikipedia/commons/d/d3/Call_stack_layout.svg)  
@@ -43,4 +46,12 @@ free the private data.(tag:GF_FREE)
       * timespec : **begin and end**
       * WIND and UNWIND, from and to.
   * xlator_cbks :
-  * 
+
+
+
+
+
+
+### Building and Debugging Glusterfs ###
+#### Building ####
+
