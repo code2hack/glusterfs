@@ -1,18 +1,35 @@
 # Development of Data Prefetching and Extensions for TIER translator #
 ## Creating/Modifying a translator to capture requests for forward analysis. ##
+### Devoloper-guide about xlators ###
+#### Setting the Stage ####
+1. fops
+2. cbks
+3. dumpops
+
+#### init , fini , and private context ####
+1. init
+* Checking the translator is being set up in the right kind of environment.
+  * Some translators are "initial" translators that **inject** requests into the system from elsewhere like kernel, network etc.
+
 ### Main thoughts about translators ###
 1. Backgrounds  
   * [Call Stack](https://en.wikipedia.org/wiki/Call_stack)  
   ![ ](https://upload.wikimedia.org/wikipedia/commons/d/d3/Call_stack_layout.svg)  
 2. Macros
-  * STACK_WIND:Adding subroutine's entry to the call stack.  
+  * STACK\_WIND\_COMMON(frame, rfn,has_cookie,cky, obj, fn, params ...)
+    * frame:current frame?
+    * rfn:callback unction
+    * has_cookie:
+    * cky:cookie:
+    * obj:
+    * fn:function to invoke
 3. Data structure
   * xl          : pointer to the _in-memory_ xlator
   * xlator_fops : defined in [xlator.h](https://github.com/code2hack/glusterfs/blob/doc/libglusterfs/src/xlator.h)
     * call_frame:
       * call_stack:
         * pool:
-          * stack\_mem\_pool
+          * [ ] stak\_mem\_pool
           * frame\_mem\_pool
         * client :
         * state  : pointer to **request state**
