@@ -2,8 +2,7 @@
 ## Creating/Modifying a translator to capture requests for forward analysis. ##
 ### Devoloper-guide about xlators ###
 #### Setting the Stage ####
-1. Loading translator(tag:dlsym), [xlator.c](https://github.com/code2hack/glusterfs/blob/doc/libglusterfs/src/xlator.c)
-[README](glusterfs/doc/README.md)
+1. Loading translator(tag:dlsym), [xlator.c](./libglusterfs/src/xlator.c)
 
 2. cbks
 3. dumpops
