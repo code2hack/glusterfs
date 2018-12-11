@@ -2,14 +2,21 @@
 ## Creating/Modifying a translator to capture requests for forward analysis. ##
 ### Devoloper-guide about xlators ###
 #### Setting the Stage ####
-1. fops
+1. Loading translator(tag:dlsym), [xlator.c](https://github.com/code2hack/glusterfs/blob/doc/libglusterfs/src/xlator.c)
+[README](./README.md)
+
 2. cbks
 3. dumpops
 
 #### init , fini , and private context ####
 1. init
 * Checking the translator is being set up in the right kind of environment.
-  * Some translators are "initial" translators that **inject** requests into the system from elsewhere like kernel, network etc.
+  * Some translators are "initial" translators that **inject** requests into the system from elsewhere like kernel, network etc. Thus they have **no parents**.
+  * Some are "final" translators(from the perspective of the current process) that they have no children.
+  * Some are "multiplex" translators that they have multiple children.
+* Allocating private data area. (tag:GF_CALLOC)
+2. fini
+free the private data.(tag:GF_FREE)
 
 ### Main thoughts about translators ###
 1. Backgrounds  
