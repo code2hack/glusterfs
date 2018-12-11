@@ -3,7 +3,7 @@
 ### Devoloper-guide about xlators ###
 #### Setting the Stage ####
 1. Loading translator(tag:dlsym), [xlator.c](https://github.com/code2hack/glusterfs/blob/doc/libglusterfs/src/xlator.c)
-[README](~/README.md)
+[README](glusterfs/doc/README.md)
 
 2. cbks
 3. dumpops
