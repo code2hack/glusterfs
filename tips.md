@@ -31,7 +31,8 @@ Example:
 
 ## Setting Up Clients ##
 Install prerequisites.
-> yum -y install openssh-server wget fuse fuse-libs openib libibverbs  
+> yum -y install openssh-server wget fuse fuse-libs openib libibverbs   
+
 Ports setting up
 ### Mounting Volumes ###
 
