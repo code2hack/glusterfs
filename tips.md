@@ -11,18 +11,18 @@ Install liburcu
 > yum install userspace-rcu-devel
 
 ## Setting Servers ##
-### Create cluster ###
+Create cluster 
 > gluster peer probe <server>
 > gluster peer status  
 
-### Partition and mount ###
+Partition and mount 
 
 > mkfs.xfs -i size=512 /dev/sdb
 > mkdir -p /export/sdb/brick
 > vi /etc/fstab
 > mount -a
 
-### Setting up Volumes ### 
+Setting up Volumes 
 > gluster volume create [stripe | replica | disperse] [transport tcp | rdma | tcp,rdma]  
 Example:
 > gluster volume create repica 3 s1:/export/sdb/brick s2:/export/sdb/brick s3:/export/sdb/brick s1:/export/sdc/brick s2:/export/sdc/brick s3:/export/sdc/brick transport tcp

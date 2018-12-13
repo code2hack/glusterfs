@@ -53,4 +53,19 @@ free the private data.(tag:GF_FREE)
 
 
 ### The [_io-stats_](xlators/debug/io-stats/src/io-stats.c) Translator ###
+#### Data Structure ####
+[From TLPI](img/FD-and-Inods.jpg)
+(tag:_ios\_conf_)  
+io-stats xlator's private data.  
+(tag:_ios\_fd_)  
+* filename
+* opened_at
+(tag:\_fd)
+* pid
+* _inode
+(tag:\_inode)
+
+#### Functions ####
+> ios\_bump\_read (xlator\_t \*this, fd\_t \*fd, size\_t len)
+
 
