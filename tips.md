@@ -35,5 +35,12 @@ Install prerequisites.
 
 Ports setting up
 ### Mounting Volumes ###
+/etc/fstab
+> s1:/gv0 /mnt/glusterfs glusterfs defaults._netdev 0 0
+
+[_netdev mounting](http://man7.org/linux/man-pages/man8/mount.8.html)
+
+** Mounting error: **_getfattr not found_
+> yum install attr
 
 
