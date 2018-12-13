@@ -52,6 +52,5 @@ free the private data.(tag:GF_FREE)
 
 
 
-### Building and Debugging Glusterfs ###
-#### Building ####
+### The [_io-stats_](xlators/debug/io-stats/src/io-stats.c) Translator ###
 
