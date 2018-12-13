@@ -54,7 +54,7 @@ free the private data.(tag:GF_FREE)
 
 ### The [_io-stats_](xlators/debug/io-stats/src/io-stats.c) Translator ###
 #### Data Structure ####
-![From TLPI](./img/FD-and-Inods.jpg)
+![From TLPI](./img/FD-and-Inodes.jpg)
 (tag:_ios\_conf_)  
 io-stats xlator's private data.  
 (tag:_ios\_fd_)  
