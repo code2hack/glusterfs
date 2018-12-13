@@ -40,7 +40,7 @@ Ports setting up
 
 [_netdev mounting](http://man7.org/linux/man-pages/man8/mount.8.html)
 
-** Mounting error: **_getfattr not found_
+**Mounting error:** _getfattr not found_
 > yum install attr
 
 
