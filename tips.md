@@ -10,7 +10,7 @@ Enabling EPEL
 Install liburcu  
 > yum install userspace-rcu-devel
 
-## Setting Servers ##
+## Setting Up Servers ##
 Creating Cluster
 > gluster peer probe <server>
 > gluster peer status  
@@ -28,4 +28,11 @@ Example:
 > gluster volume create gv0 replica 3 transport tcp s1:/export/sdb/brick s2:/export/sdb/brick s3:/export/sdb/brick s1:/export/sdc/brick s2:/export/sdc/brick s3:/export/sdc/brick
 > gluster volume start gv0
 > gluster volume info
+
+## Setting Up Clients ##
+Install prerequisites.
+> yum -y install openssh-server wget fuse fuse-libs openib libibverbs  
+Ports setting up
+### Mounting Volumes ###
+
 
