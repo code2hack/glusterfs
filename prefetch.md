@@ -62,10 +62,15 @@ io-stats xlator's private data.
 * opened_at
 (tag:\_fd)
 * pid
-* _inode
+* \_inode
+* \_ctx:A dictionary referred to each xlator. xlator's pointer -- value?
 (tag:\_inode)
 
+[**\_inode**](./libglusterfs/src/inode.c)  
+
 #### Functions ####
+> fd\_
 > ios\_bump\_read (xlator\_t \*this, fd\_t \*fd, size\_t len)
 
-
+> inode_t * inode_link (inode_t *inode, inode_t *parent, const char* name, struct iatt *iatt)
+>

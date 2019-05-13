@@ -26,3 +26,10 @@ Setting up Volumes
 > gluster volume create [stripe | replica | disperse] [transport tcp | rdma | tcp,rdma]  
 Example:
 > gluster volume create repica 3 s1:/export/sdb/brick s2:/export/sdb/brick s3:/export/sdb/brick s1:/export/sdc/brick s2:/export/sdc/brick s3:/export/sdc/brick transport tcp
+
+## Administration Guide ##
+Starting glusterd automatically.
+> chkconfig glusterd on
+
+### Managing Trusted Storage Pool ###
+
