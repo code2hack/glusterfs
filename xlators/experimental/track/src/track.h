@@ -15,11 +15,14 @@
 #include "common-utils.h"
 #include "event-history.h"
 #include "logging.h"
-#include "circ-buff.h"
 #include "statedump.h"
 #include "options.h"
+#include "ring-buff.h"
+#include "req2vec.h"
 
-#define TRACK_DEFAULT_HISTORY_SIZE 1024
+#define TRACK_DEFAULT_BUFFER_SIZE 4096
+#define TRACK_MAX_READ_THREADS 32
+#define TRACK_DEFAULT_READ_THREADS 4
 
 typedef struct {
         /* Since the longest fop name is fremovexattr i.e 12 characters, array size
@@ -28,6 +31,13 @@ typedef struct {
         char name[24];
         int enabled;
 } track_fop_name_t;
+typedef struct track_conf {
+        ring_buffer_t *buffer;
+        pthread_t read_threads[TRACK_MAX_READ_THREADS];
+        int threads_num;
+        bool read_threads_should_die;
+        /*----Location of log/module. The root path of mounted point is recommended----*/
+} track_conf_t;
 
 track_fop_name_t track_fop_names[GF_FOP_MAXVALUE];
 

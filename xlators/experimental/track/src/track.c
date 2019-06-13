@@ -17,80 +17,342 @@
  *    their _cbk functions, which later passes the call to next layer.
  *    Very helpful translator for debugging.
  */
-#define TRACK_STAT_TO_STR(buf, str) track_stat_to_str (buf, str, sizeof (str))
-/*
-typedef struct _track_sample_t {
-        uid_t               uid;
-        fd_t                fd;
-        char                *app;
-        glusterfs_fop_t     fop;
-        loc_t               *loc;
-        size_t              size;
-        off_t               offset;
-        uint32_t            flag;
-} track_sample_t;
-*/
-typedef struct {
-        size_t       history_size;
-} track_conf_t;
+//#define TRACK_STAT_TO_STR(buf, str) track_stat_to_str (buf, str, sizeof (str))
 
-struct track_cumulative {
-        uint64_t blocks;
-        uint64_t meta_op_num;
-}
-
-typedef struct track_conf {
-        pthread_t                 dump_thread;
-        gf_boolean_t              dump_thread_should_die;
-        gf_boolean_t              dump_thread_running;
-} track_conf_t;
-
-
-void *
-_dump_history_thread (xlator_t *this)
+int
+track_entrylk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        struct track_conf       *conf = NULL;
-        FILE                    *stats_logfp = NULL;
-        FILE                    *samples_logfp = NULL;
-        struct track_dump_args  ags = {0};
-        int                     i;
-        int                     stats_bytes_written = 0;
-        int                     samples_bytes_written = 0;
-        char                    stats_filename[PATH_MAX];
-        char                    samples_filename[PATH_MAX];
-        char                    *xlator_name;
-        char                    *instance_name;
-        gf_boolean_t            log_stats_fopen_failure = _gf_true;
-        gf_boolean_t            log_samples_fopen_failure = _gf_true;
-
-        char     timestr[256] = {0,};
-        /* Since we are continuing with adding entries to the buffer even when
-           gettimeofday () fails, it's safe to check tm and then dump the time
-           at which the entry was added to the buffer */
-
-        gf_time_fmt (timestr, sizeof timestr, cb->tv.tv_sec, gf_timefmt_Ymd_T);
-        snprintf (timestr + strlen (timestr), 256 - strlen (timestr),
-                  ".%"GF_PRI_SUSECONDS, cb->tv.tv_usec);
-        gf_proc_dump_write ("TIME", "%s", timestr);
-
-        gf_proc_dump_write ("FOP", "%s\n", cb->data);
-
+        TRACE_STACK_UNWIND (entrylk, frame, op_ret, op_errno, xdata);
         return 0;
 }
 
-/* *_cbk section over <----------> fop section start */
+int
+track_inodelk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (inodelk, frame, op_ret, op_errno, xdata);
+        return 0;
+}
 
+int
+track_finodelk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (finodelk, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_xattrop_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (xattrop, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_fxattrop_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (fxattrop, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_lookup_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (lookup, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_stat_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (stat, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_readlink_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (readlink, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_mknod_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (mknod, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_mkdir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (mkdir, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_unlink_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (unlink, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_rmdir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (rmdir, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_symlink_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (symlink, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_rename_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (rename, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_link_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (link, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_setattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (setattr, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_fsetattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (fsetattr, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_seek_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (seek, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_truncate_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (truncate, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_open_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (open, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_create_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (create, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_readv_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (readv, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_writev_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (writev, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_statfs_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (statfs, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_flush_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (flush, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_fsync_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (fsync, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_setxattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (setxattr, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_getxattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (getxattr, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_removexattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (removexattr, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_opendir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (opendir, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_readdirp_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (readdirp, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_readdir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (readdir, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_fsyncdir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (fsyncdir, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_access_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (access, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_rchecksum_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (rchecksum, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_fentrylk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (fentrylk, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_fgetxattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (fgetxattr, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_fsetxattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (fsetxattr, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_ftruncate_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (ftruncate, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_fstat_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (fstat, frame, op_ret, op_errno, xdata);
+        return 0;
+}
+
+int
+track_lk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
+{
+        TRACE_STACK_UNWIND (lk, frame, op_ret, op_errno, xdata);
+        return 0;
+}
 int
 track_entrylk (call_frame_t *frame, xlator_t *this,
                const char *volume, loc_t *loc, const char *basename,
                entrylk_cmd cmd, entrylk_type type, dict_t *xdata)
 {
         track_conf_t   *conf = NULL;
-
         conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_ENTRYLK].enabled) {
                 char     string[4096] = {0,};
                 snprintf (string, sizeof (string),
@@ -103,12 +365,10 @@ track_entrylk (call_frame_t *frame, xlator_t *this,
                            "ENTRYLK_UNLOCK"),
                           ((type == ENTRYLK_RDLCK) ? "ENTRYLK_RDLCK" :
                            "ENTRYLK_WRLCK"));
-
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'entrylk',string));
         }
-
 out:
         STACK_WIND (frame, track_entrylk_cbk,
                     FIRST_CHILD (this),
@@ -121,14 +381,13 @@ int
 track_inodelk (call_frame_t *frame, xlator_t *this, const char *volume,
                loc_t *loc, int32_t cmd, struct gf_flock *flock, dict_t *xdata)
 {
+
         char         *cmd_str  = NULL;
         char         *type_str = NULL;
         track_conf_t *conf     = NULL;
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_INODELK].enabled) {
                 char string[4096]  = {0,};
                 switch (cmd) {
@@ -185,7 +444,7 @@ track_inodelk (call_frame_t *frame, xlator_t *this, const char *volume,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'inodelk',string));
         }
 
 out:
@@ -206,8 +465,6 @@ track_finodelk (call_frame_t *frame, xlator_t *this, const char *volume,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FINODELK].enabled) {
                 char  string[4096] = {0,};
                 switch (cmd) {
@@ -264,7 +521,7 @@ track_finodelk (call_frame_t *frame, xlator_t *this, const char *volume,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'finodelk',string));
         }
 out:
         STACK_WIND (frame, track_finodelk_cbk,
@@ -282,8 +539,6 @@ track_xattrop (call_frame_t *frame, xlator_t *this, loc_t *loc,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_XATTROP].enabled) {
                 char    string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -294,7 +549,8 @@ track_xattrop (call_frame_t *frame, xlator_t *this, loc_t *loc,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'xattrop',string));
+
         }
 
 out:
@@ -314,8 +570,6 @@ track_fxattrop (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FXATTROP].enabled) {
                 char    string[4096]  = {0,};
                 snprintf (string, sizeof (string),
@@ -325,7 +579,7 @@ track_fxattrop (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer,create_req(loc,0,0,'fxattrop',string));
         }
 
 out:
@@ -357,7 +611,7 @@ track_lookup (call_frame_t *frame, xlator_t *this,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer,create_req(loc,0,0,'lookup',string));
         }
 
 out:
@@ -373,11 +627,9 @@ int
 track_stat (call_frame_t *frame, xlator_t *this, loc_t *loc, dict_t *xdata)
 {
         track_conf_t  *conf = NULL;
-
+        ring_buffer_t *buffer = conf->buffer;
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-                goto out;
         if (track_fop_names[GF_FOP_STAT].enabled) {
                 char  string[4096]  = {0,};
                 snprintf (string, sizeof (string),
@@ -387,7 +639,7 @@ track_stat (call_frame_t *frame, xlator_t *this, loc_t *loc, dict_t *xdata)
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'stat',string));
         }
 
 out:
@@ -407,8 +659,6 @@ track_readlink (call_frame_t *frame, xlator_t *this, loc_t *loc, size_t size,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_READLINK].enabled) {
                 char      string[4096] = {0,};
                 snprintf (string, sizeof (string),
@@ -419,7 +669,7 @@ track_readlink (call_frame_t *frame, xlator_t *this, loc_t *loc, size_t size,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'readlink',string));
         }
 
 out:
@@ -439,8 +689,6 @@ track_mknod (call_frame_t *frame, xlator_t *this, loc_t *loc,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-                goto out;
         if (track_fop_names[GF_FOP_MKNOD].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -450,7 +698,7 @@ track_mknod (call_frame_t *frame, xlator_t *this, loc_t *loc,
                           uuid_utoa (loc->inode->gfid), loc->path,
                           mode, umask, dev);
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'mknod',string));
         }
 
 out:
@@ -470,8 +718,6 @@ track_mkdir (call_frame_t *frame, xlator_t *this, loc_t *loc, mode_t mode,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_MKDIR].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -480,7 +726,7 @@ track_mkdir (call_frame_t *frame, xlator_t *this, loc_t *loc, mode_t mode,
                           uuid_utoa (loc->inode->gfid), loc->path,
                           mode, umask);
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'mkdir',string));
         }
 
 out:
@@ -499,8 +745,6 @@ track_unlink (call_frame_t *frame, xlator_t *this, loc_t *loc, int xflag,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_UNLINK].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -511,7 +755,7 @@ track_unlink (call_frame_t *frame, xlator_t *this, loc_t *loc, int xflag,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'unlink',string));
         }
 out:
         STACK_WIND (frame, track_unlink_cbk,
@@ -529,8 +773,6 @@ track_rmdir (call_frame_t *frame, xlator_t *this, loc_t *loc, int flags,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_RMDIR].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -541,7 +783,7 @@ track_rmdir (call_frame_t *frame, xlator_t *this, loc_t *loc, int flags,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'rmdir',string));
         }
 
 out:
@@ -561,8 +803,6 @@ track_symlink (call_frame_t *frame, xlator_t *this, const char *linkpath,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_SYMLINK].enabled) {
                 char     string[4096]   =  {0,};
                 snprintf (string, sizeof (string),
@@ -571,7 +811,8 @@ track_symlink (call_frame_t *frame, xlator_t *this, const char *linkpath,
                           uuid_utoa (loc->inode->gfid), linkpath,
                           loc->path, umask);
 
-                LOG_ELEMENT (conf, string);
+                //TODO:
+                rb_write_data(conf->buffer, create_req(loc,0,0,'symlink',string));
         }
 
 out:
@@ -593,8 +834,6 @@ track_rename (call_frame_t *frame, xlator_t *this, loc_t *oldloc, loc_t *newloc,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_RENAME].enabled) {
                 char string[4096] = {0,};
                 if (newloc->inode)
@@ -612,7 +851,8 @@ track_rename (call_frame_t *frame, xlator_t *this, loc_t *oldloc, loc_t *newloc,
 
                 frame->local = oldloc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                //TODO?
+                rb_write_data(conf->buffer, create_req(oldloc,0,0,'rename',string));
         }
 
 out:
@@ -634,8 +874,6 @@ track_link (call_frame_t *frame, xlator_t *this, loc_t *oldloc, loc_t *newloc,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_LINK].enabled) {
                 char string[4096]  = {0,};
                 if (newloc->inode)
@@ -653,7 +891,7 @@ track_link (call_frame_t *frame, xlator_t *this, loc_t *oldloc, loc_t *newloc,
 
                 frame->local = oldloc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(oldloc,0,0,'link',string));
         }
 
 out:
@@ -674,8 +912,6 @@ track_setattr (call_frame_t *frame, xlator_t *this, loc_t *loc,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_SETATTR].enabled) {
                 char     string[4096]  =  {0,};
                 if (valid & GF_SET_ATTR_MODE) {
@@ -687,7 +923,6 @@ track_setattr (call_frame_t *frame, xlator_t *this, loc_t *loc,
                                   st_mode_from_ia (stbuf->ia_prot,
                                                    stbuf->ia_type));
 
-                        LOG_ELEMENT (conf, string);
                         memset (string, 0 , sizeof (string));
                 }
 
@@ -699,7 +934,6 @@ track_setattr (call_frame_t *frame, xlator_t *this, loc_t *loc,
                                   loc->path, stbuf->ia_uid,
                                   stbuf->ia_gid);
 
-                        LOG_ELEMENT (conf, string);
                         memset (string, 0 , sizeof (string));
                 }
 
@@ -717,9 +951,9 @@ track_setattr (call_frame_t *frame, xlator_t *this, loc_t *loc,
                                   uuid_utoa (loc->inode->gfid),
                                   loc->path, actime_str, modtime_str);
 
-                        LOG_ELEMENT (conf, string);
                         memset (string, 0 , sizeof (string));
                 }
+                rb_write_data(conf->buffer, create_req(loc,0,0,'setattr',NULL));
                 frame->local = loc->inode->gfid;
         }
 
@@ -742,8 +976,6 @@ track_fsetattr (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FSETATTR].enabled) {
                 char     string[4096]  =  {0,};
                 if (valid & GF_SET_ATTR_MODE) {
@@ -754,7 +986,6 @@ track_fsetattr (call_frame_t *frame, xlator_t *this, fd_t *fd,
                                   st_mode_from_ia (stbuf->ia_prot,
                                                    stbuf->ia_type));
 
-                        LOG_ELEMENT (conf, string);
                         memset (string, 0, sizeof (string));
                 }
 
@@ -765,7 +996,6 @@ track_fsetattr (call_frame_t *frame, xlator_t *this, fd_t *fd,
                                   uuid_utoa (fd->inode->gfid),
                                   fd, stbuf->ia_uid, stbuf->ia_gid);
 
-                        LOG_ELEMENT (conf, string);
                         memset (string, 0, sizeof (string));
                 }
 
@@ -783,9 +1013,9 @@ track_fsetattr (call_frame_t *frame, xlator_t *this, fd_t *fd,
                                   uuid_utoa (fd->inode->gfid),
                                   fd, actime_str, modtime_str);
 
-                        LOG_ELEMENT (conf, string);
                         memset (string, 0, sizeof (string));
                 }
+                rb_write_data(conf->buffer, create_req(NULL,0,0,'fsetattr','TODO:FD to loc here'));
                 frame->local = fd->inode->gfid;
         }
 
@@ -798,26 +1028,7 @@ out:
         return 0;
 }
 
-static int
-track_seek_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
-                int32_t op_ret, int32_t op_errno, off_t offset, dict_t *xdata)
-{
-        track_conf_t  *conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-                goto out;
-        if (track_fop_names[GF_FOP_SEEK].enabled) {
-                char  string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d op_errno=%d, "
-                          "offset=%"PRId64"", frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno, offset);
-                LOG_ELEMENT (conf, string);
-        }
-out:
-        TRACK_STACK_UNWIND (seek, frame, op_ret, op_errno, offset, xdata);
-        return 0;
-}
 
 static int
 track_seek (call_frame_t *frame, xlator_t *this, fd_t *fd,
@@ -825,8 +1036,6 @@ track_seek (call_frame_t *frame, xlator_t *this, fd_t *fd,
 {
         track_conf_t   *conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-                goto out;
         if (track_fop_names[GF_FOP_SEEK].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string), "%"PRId64": gfid=%s fd=%p "
@@ -834,7 +1043,7 @@ track_seek (call_frame_t *frame, xlator_t *this, fd_t *fd,
                           uuid_utoa (fd->inode->gfid), fd, offset, what);
 
                 frame->local = fd->inode->gfid;
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('TODO:FD to loc here',offset,0,'seek',string));
         }
 out:
         STACK_WIND (frame, track_seek_cbk, FIRST_CHILD(this),
@@ -851,8 +1060,6 @@ track_truncate (call_frame_t *frame, xlator_t *this, loc_t *loc,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_TRUNCATE].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -863,7 +1070,7 @@ track_truncate (call_frame_t *frame, xlator_t *this, loc_t *loc,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,offset,0,'truncate',string));
         }
 
 out:
@@ -883,8 +1090,6 @@ track_open (call_frame_t *frame, xlator_t *this, loc_t *loc,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_OPEN].enabled) {
                 char      string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -894,8 +1099,8 @@ track_open (call_frame_t *frame, xlator_t *this, loc_t *loc,
                           flags, fd);
 
                 frame->local = loc->inode->gfid;
-                
-                TRACK_ELEMENT(conf,string); 
+                //TODO:flags?
+                rb_write_data(conf->buffer, create_req(loc,0,0,'open',string));
         }
 
 out:
@@ -915,8 +1120,6 @@ track_create (call_frame_t *frame, xlator_t *this, loc_t *loc,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_CREATE].enabled) {
                 char    string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -926,7 +1129,7 @@ track_create (call_frame_t *frame, xlator_t *this, loc_t *loc,
                           uuid_utoa (loc->inode->gfid), loc->path,
                           fd, flags, mode, umask);
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'create',string));
         }
 
 out:
@@ -945,8 +1148,6 @@ track_readv (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_READ].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -958,7 +1159,7 @@ track_readv (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('TODO:FD2loc',offset,size,'readv',string));
         }
 
 out:
@@ -980,8 +1181,6 @@ track_writev (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_WRITE].enabled) {
                 char     string[4096]  =  {0,};
                 for (i = 0; i < count; i++)
@@ -996,7 +1195,7 @@ track_writev (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('TODO:FD2loc',offset,0,'writev',string));
         }
 
 out:
@@ -1014,8 +1213,6 @@ track_statfs (call_frame_t *frame, xlator_t *this, loc_t *loc, dict_t *xdata)
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_STATFS].enabled) {
                 char  string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1023,7 +1220,7 @@ track_statfs (call_frame_t *frame, xlator_t *this, loc_t *loc, dict_t *xdata)
                           frame->root->unique, (loc->inode)?
                           uuid_utoa (loc->inode->gfid):"0", loc->path);
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'statfs',string));
         }
 
 out:
@@ -1041,8 +1238,6 @@ track_flush (call_frame_t *frame, xlator_t *this, fd_t *fd, dict_t *xdata)
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FLUSH].enabled) {
                 char    string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1052,7 +1247,7 @@ track_flush (call_frame_t *frame, xlator_t *this, fd_t *fd, dict_t *xdata)
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('TODO:fd2loc',0,0,'flush',string));
         }
 
 out:
@@ -1071,8 +1266,6 @@ track_fsync (call_frame_t *frame, xlator_t *this, fd_t *fd, int32_t flags,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FSYNC].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1082,7 +1275,7 @@ track_fsync (call_frame_t *frame, xlator_t *this, fd_t *fd, int32_t flags,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',0,0,'fsync',string));
         }
 
 out:
@@ -1101,8 +1294,6 @@ track_setxattr (call_frame_t *frame, xlator_t *this,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_SETXATTR].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1113,7 +1304,7 @@ track_setxattr (call_frame_t *frame, xlator_t *this,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'setxattr',string));
         }
 
 out:
@@ -1132,8 +1323,6 @@ track_getxattr (call_frame_t *frame, xlator_t *this,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_GETXATTR].enabled) {
                 char    string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1144,7 +1333,7 @@ track_getxattr (call_frame_t *frame, xlator_t *this,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'getxattr',string));
         }
 
 out:
@@ -1163,8 +1352,6 @@ track_removexattr (call_frame_t *frame, xlator_t *this,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_REMOVEXATTR].enabled) {
                 char   string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1175,7 +1362,7 @@ track_removexattr (call_frame_t *frame, xlator_t *this,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'removexattr',string));
         }
 
 out:
@@ -1195,8 +1382,6 @@ track_opendir (call_frame_t *frame, xlator_t *this, loc_t *loc, fd_t *fd,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_OPENDIR].enabled) {
                 char   string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1206,7 +1391,7 @@ track_opendir (call_frame_t *frame, xlator_t *this, loc_t *loc, fd_t *fd,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'opendir',string));
         }
 
 out:
@@ -1225,8 +1410,6 @@ track_readdirp (call_frame_t *frame, xlator_t *this, fd_t *fd, size_t size,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_READDIRP].enabled) {
                 char   string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1238,7 +1421,8 @@ track_readdirp (call_frame_t *frame, xlator_t *this, fd_t *fd, size_t size,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',offset,size,'readdirp',string));
+
         }
 
 out:
@@ -1258,8 +1442,6 @@ track_readdir (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_READDIR].enabled) {
                 char   string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1271,7 +1453,7 @@ track_readdir (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',offset,size,'readdir',string));
         }
 
 out:
@@ -1291,8 +1473,6 @@ track_fsyncdir (call_frame_t *frame, xlator_t *this,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FSYNCDIR].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1302,7 +1482,7 @@ track_fsyncdir (call_frame_t *frame, xlator_t *this,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',0,0,'fsyncdir',string));
         }
 
 out:
@@ -1321,8 +1501,6 @@ track_access (call_frame_t *frame, xlator_t *this, loc_t *loc, int32_t mask,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_ACCESS].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1333,7 +1511,7 @@ track_access (call_frame_t *frame, xlator_t *this, loc_t *loc, int32_t mask,
 
                 frame->local = loc->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(loc,0,0,'access',string));
         }
 
 out:
@@ -1353,8 +1531,6 @@ track_rchecksum (call_frame_t *frame, xlator_t *this, fd_t *fd, off_t offset,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_RCHECKSUM].enabled) {
                 char    string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1364,7 +1540,7 @@ track_rchecksum (call_frame_t *frame, xlator_t *this, fd_t *fd, off_t offset,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',offset,len,'rchecksum',string));
         }
 
 out:
@@ -1386,8 +1562,6 @@ track_fentrylk (call_frame_t *frame, xlator_t *this, const char *volume,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FENTRYLK].enabled) {
                 char      string[4096]   =  {0,};
                 snprintf (string, sizeof (string),
@@ -1403,7 +1577,7 @@ track_fentrylk (call_frame_t *frame, xlator_t *this, const char *volume,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',0,0,'fentrylk',string));
         }
 
 out:
@@ -1423,8 +1597,6 @@ track_fgetxattr (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-                goto out;
         if (track_fop_names[GF_FOP_FGETXATTR].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1433,8 +1605,9 @@ track_fgetxattr (call_frame_t *frame, xlator_t *this, fd_t *fd,
                           uuid_utoa (fd->inode->gfid), fd, name);
 
                 frame->local = fd->inode->gfid;
+                
+                rb_write_data(conf->buffer, create_req("TODO",0,0,'fgetxattr',string));
 
-                LOG_ELEMENT (conf, string);
         }
 
 out:
@@ -1453,8 +1626,6 @@ track_fsetxattr (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FSETXATTR].enabled) {
                 char   string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1464,7 +1635,7 @@ track_fsetxattr (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req(TODO,0,0,'fsetxattr',string));
         }
 
 out:
@@ -1483,8 +1654,6 @@ track_ftruncate (call_frame_t *frame, xlator_t *this,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FTRUNCATE].enabled) {
                 char    string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1494,7 +1663,7 @@ track_ftruncate (call_frame_t *frame, xlator_t *this,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',offset,0,'ftruncate',string));
         }
 
 out:
@@ -1513,8 +1682,6 @@ track_fstat (call_frame_t *frame, xlator_t *this, fd_t *fd, dict_t *xdata)
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_FSTAT].enabled) {
                 char   string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1524,7 +1691,7 @@ track_fstat (call_frame_t *frame, xlator_t *this, fd_t *fd, dict_t *xdata)
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',0,0,'fstat',string));
         }
 
 out:
@@ -1543,8 +1710,6 @@ track_lk (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_LK].enabled) {
                 char     string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
@@ -1559,7 +1724,7 @@ track_lk (call_frame_t *frame, xlator_t *this, fd_t *fd,
 
                 frame->local = fd->inode->gfid;
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',0,0,'lk',string));
         }
 
 out:
@@ -1578,14 +1743,12 @@ track_forget (xlator_t *this, inode_t *inode)
         conf = this->private;
         /* If user want to understand when a lookup happens,
            he should know about 'forget' too */
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_LOOKUP].enabled) {
                 char   string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
                           "gfid=%s", uuid_utoa (inode->gfid));
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('',0,0,'forget',string));
         }
 
 out:
@@ -1599,15 +1762,13 @@ track_releasedir (xlator_t *this, fd_t *fd)
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_OPENDIR].enabled) {
                 char   string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
                           "gfid=%s fd=%p",
                           uuid_utoa (fd->inode->gfid), fd);
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',0,0,'releasedir',string));
         }
 
 out:
@@ -1621,8 +1782,6 @@ track_release (xlator_t *this, fd_t *fd)
 
         conf = this->private;
 
-        if (!conf->log_file && !conf->log_history)
-		goto out;
         if (track_fop_names[GF_FOP_OPEN].enabled ||
             track_fop_names[GF_FOP_CREATE].enabled) {
                 char   string[4096]  =  {0,};
@@ -1630,7 +1789,7 @@ track_release (xlator_t *this, fd_t *fd)
                           "gfid=%s fd=%p",
                           uuid_utoa (fd->inode->gfid), fd);
 
-                LOG_ELEMENT (conf, string);
+                rb_write_data(conf->buffer, create_req('fd',0,0,'release',string));
         }
 
 out:
@@ -1638,65 +1797,9 @@ out:
 }
 
 
-void
-enable_all_calls (int enabled)
-{
-        int i;
-
-        for (i = 0; i < GF_FOP_MAXVALUE; i++)
-                track_fop_names[i].enabled = enabled;
-}
-
-void
-enable_call (const char *name, int enabled)
-{
-        int i;
-        for (i = 0; i < GF_FOP_MAXVALUE; i++)
-                if (!strcasecmp(track_fop_names[i].name, name))
-                        track_fop_names[i].enabled = enabled;
-}
 
 
-/*
-  include = 1 for "include-ops"
-  = 0 for "exclude-ops"
-*/
-void
-process_call_list (const char *list, int include)
-{
-        enable_all_calls (include ? 0 : 1);
 
-        char *call = strsep ((char **)&list, ",");
-
-        while (call) {
-                enable_call (call, include);
-                call = strsep ((char **)&list, ",");
-        }
-}
-
-int32_t
-track_dump_history (xlator_t *this)
-{
-        int ret = -1;
-        char key_prefix[GF_DUMP_MAX_BUF_LEN] = {0,};
-        track_conf_t *conf = NULL;
-
-        GF_VALIDATE_OR_GOTO ("track", this, out);
-        GF_VALIDATE_OR_GOTO (this->name, this->history, out);
-
-        conf = this->private;
-        // Is it ok to return silently if log-history option his off?
-        if (conf && conf->log_history == _gf_true) {
-                gf_proc_dump_build_key (key_prefix, "xlator.debug.track",
-                                        "history");
-                gf_proc_dump_add_section (key_prefix);
-                eh_dump (this->history, NULL, dump_history_track);
-        }
-        ret = 0;
-
-out:
-        return ret;
-}
 
 int32_t
 mem_acct_init (xlator_t *this)
@@ -1775,24 +1878,62 @@ reconfigure (xlator_t *this, dict_t *options)
 out:
         return ret;
 }
-void *
-_track_dump_thread (xlator_t *this) {
-        track_conf_t        *conf = NULL;
-        FILE                *history_logfp = NULL;
-        conf = this->private;
 
+void _read_proc(xlator_t *this)
+{
+        track_conf_t *conf = this->private;
+        ring_buffer_t *buffer = conf->buffer;
+        void *data= NULL;
+        for (;;)
+        {
+                if (conf->read_threads_should_die)
+                        break;
+                pthread_mutex_lock(buffer->lock);
+                {
+                        while (buffer->size_used == 0)
+                                pthread_cond_wait(&buffer->read_signal, &buffer->lock);
+                        data = rb_read_element(buffer);
+                }
+                pthread_mutex_unlock(buffer->lock);
+                /*Deal with the data here*/
 
+                /*----------*/
 
-
-
-
+        }
+        return;
 }
+void _destroy_conf(track_conf_t *conf)
+{
+        if(!conf)
+                return;
+        _destroy_read_procs(conf);
+        
+        if(conf->buffer)
+        {
+                rb_buffer_destroy(conf->buffer);
+        }
+        GF_FREE(conf);
+        return;
+}
+void _destroy_read_procs(track_conf_t *conf)
+{
+        int i;
+        conf->read_threads_should_die = true;
+        for (i=0;i<conf->threads_num;i++)
+        {
+                if (!conf->read_threads[i])
+                        continue;
+                pthread_cancel(conf->read_threads[i]);
+                pthread_join(conf->read_threads[i]);
+        }
+}
+
 int32_t
 init (xlator_t *this)
 {
         track_conf_t    *conf = NULL;
-        eh_t            *history = NULL;
-        size_t          history_size = TRACK_DEFAULT_HISTORY_SIZE;
+        dict_t *options = NULL;
+        size_t buff_size = TRACK_DEFAULT_BUFFER_SIZE;
         int             ret = -1;
         if (!this)
                 return -1;
@@ -1803,15 +1944,42 @@ init (xlator_t *this)
         if (!this->parents){
                 gf_log(this->name, GF_LOG_WARNING, "dangling volume. check volfile ");
         }
-
         conf = GF_CALLOC (1, sizeof(track_conf_t), gf_track_mt_track_conf_t);
         if (!conf)
                 goto out;
-        /*----Thread----*/
-        conf->dump_thread_running = _gf_true;
-        conf->dump_thread_should_die = _gf_false;
-        ret = gf_thread_create(&conf->dump_thread, NULL, (void *) &_track_dump_thread, this, "trackdump");
-
+        options = this->options;
+        /*----Buffer initialization----*/
+        GF_OPTION_INIT("buff-size",buff_size,size_t,out);
+        conf->buffer = rb_buffer_new(buff_size,
+                (void (*)(void *)) &destroy_req
+                );
+        if(!conf->buffer)
+                goto out;
+        /*----Thread init----*/
+        GF_OPTION_INIT("threads-num", conf->threads_num, int, out);
+        if (conf->threads_num > TRACK_MAX_READ_THREADS)
+        {
+                gf_log(this->name,GF_LOG_ERROR,"Number of threads can not be more than %d",
+                TRACK_MAX_READ_THREADS);
+                goto out;
+        }
+        {
+                int i;
+                char thread_name[GF_THREAD_NAMEMAX+GF_THREAD_NAME_PREFIX_LEN] = {0,};
+                for (i=0;i<conf->threads_num;i++)
+                {
+                        snprintf(thread_name, sizeof(thread_name),"trackread%d",i);
+                        ret = gf_thread_create(&conf->read_threads[i],NULL,
+                        (void*)&_read_proc/*read function*/,
+                        this,thread_name);
+                        if(ret)
+                        {
+                                gf_log(this->name, GF_LOG_ERROR,"trackread thread %d failed",i);
+                                goto out;
+                        }
+                }
+                conf->read_threads_should_die = false;
+        }
         /*----Enable tracing for all the ops----*/
         {
                 int i;
@@ -1828,17 +1996,11 @@ init (xlator_t *this)
                                         trace_fop_names[i].name) - 1] = 0;
                 }
         }
-        /*-----Options------*/
-        /*-----History------*/
-        history = eh_new (history_size, _gf_false, NULL);
-        if (!history) {
-                gf_log (this->name, GF_LOG_ERROR, "event history cannot be "
-                        "initialized");
-                return -1;
-        }
-        this->history = history;
-        /*----Locks-----*/
+        return ret;
+out:
 
+        if (ret == -1)
+                _destroy_conf(conf);
         return ret;
 }
 
@@ -1848,8 +2010,6 @@ fini (xlator_t *this)
         if (!this)
                 return;
 
-        if (this->history)
-                eh_destroy (this->history);
 
         gf_log (this->name, GF_LOG_INFO,
                 "track translator unloaded");
