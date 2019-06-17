@@ -1087,7 +1087,8 @@ track_open (call_frame_t *frame, xlator_t *this, loc_t *loc,
             int32_t flags, fd_t *fd, dict_t *xdata)
 {
         track_conf_t   *conf = NULL;
-
+        req_t *req = NULL;
+        int ret = -1;
         conf = this->private;
 
         if (track_fop_names[GF_FOP_OPEN].enabled) {
@@ -1100,10 +1101,14 @@ track_open (call_frame_t *frame, xlator_t *this, loc_t *loc,
 
                 frame->local = loc->inode->gfid;
                 //TODO:flags?
-                rb_write_data(conf->buffer, create_req(loc,0,0,'open',string));
+                req = create_req(loc,0,0,'open',string);
+                ret = rb_write_data(conf->buffer, req);
+                if (ret == -1)
+                {
+                        gf_log(this,GF_WARNING,"Track buffer full");
+                }
         }
 
-out:
         STACK_WIND (frame, track_open_cbk,
                     FIRST_CHILD(this),
                     FIRST_CHILD(this)->fops->open,
@@ -1117,8 +1122,9 @@ track_create (call_frame_t *frame, xlator_t *this, loc_t *loc,
               dict_t *xdata)
 {
         track_conf_t   *conf = NULL;
-
+        req_t *req = NULL;
         conf = this->private;
+
 
         if (track_fop_names[GF_FOP_CREATE].enabled) {
                 char    string[4096]  =  {0,};
@@ -1128,11 +1134,13 @@ track_create (call_frame_t *frame, xlator_t *this, loc_t *loc,
                           frame->root->unique,
                           uuid_utoa (loc->inode->gfid), loc->path,
                           fd, flags, mode, umask);
-
-                rb_write_data(conf->buffer, create_req(loc,0,0,'create',string));
+                req = create_req(loc,0,0,'create',string)
+                ret = rb_write_data(conf->buffer, req);
+                if (ret == -1)
+                        gf_log(this,GF_WARNING,"Track buffer is full");
+                
         }
 
-out:
         STACK_WIND (frame, track_create_cbk,
                     FIRST_CHILD(this),
                     FIRST_CHILD(this)->fops->create,

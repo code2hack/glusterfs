@@ -14,10 +14,9 @@
 /* hold lock while calling this function */
 int _rb_write_data(ring_buffer_t *buffer, void *item)
 {
-        if (buffer->size_used == buffer->size_buffer)
-                return buffer->w_index;
         void *ptr = NULL;
-        int ret = -1;
+        if (buffer->size_used == buffer->size_buffer)
+                return -1;
         //DO we really need the assert here?
         //GF_ASSERT (buffer->used_len <= buffer->size_buffer);
         /*Should we free the buffer at writing point here?*/
@@ -32,7 +31,6 @@ int _rb_write_data(ring_buffer_t *buffer, void *item)
 int rb_write_data(ring_buffer_t *buffer, void *item)
 {
         int write_index = -1;
-        int s;
         pthread_mutex_lock(&buffer->lock);
         {
                 write_index = _rb_write_data(buffer, item);
@@ -42,7 +40,7 @@ int rb_write_data(ring_buffer_t *buffer, void *item)
         return write_index;
 }
 
-void* rb_read_data(ring_buffer_t *buffer)
+void *rb_read_data(ring_buffer_t *buffer)
 {
         void *data = buffer->rb[buffer->r_index];
         if (data)
@@ -53,10 +51,8 @@ void* rb_read_data(ring_buffer_t *buffer)
         return data;
 }
 
-
-
 ring_buffer_t *
-rb_buffer_new(size_t buffer_size,void (*destroy_buffer_data)(void *data))
+rb_buffer_new(size_t buffer_size, void (*destroy_buffer_data)(void *data))
 {
         ring_buffer_t *buffer = NULL;
         buffer = malloc(sizeof(ring_buffer_t));
@@ -65,7 +61,7 @@ rb_buffer_new(size_t buffer_size,void (*destroy_buffer_data)(void *data))
                 goto out;
         }
 
-        buffer->rb = calloc(buffer_size, sizeof(void*));
+        buffer->rb = calloc(buffer_size, sizeof(void *));
         if (!buffer->rb)
         {
                 free(buffer);
