@@ -14,7 +14,6 @@
 /* hold lock while calling this function */
 int _rb_write_data(ring_buffer_t *buffer, void *item)
 {
-        void *ptr = NULL;
         if (buffer->size_used == buffer->size_buffer)
                 return -1;
         //DO we really need the assert here?

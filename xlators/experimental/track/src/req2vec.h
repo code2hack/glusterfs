@@ -1,7 +1,7 @@
 #ifndef _REQ2VEC_H
 #define _REQ2VEC_H
 
-
+#include "common-utils.h"
 
 typedef struct _req
 {
@@ -21,7 +21,7 @@ typedef struct _window
 }window_t;
 
 req_t *
-create_req (char *loc, off_t offset, size_t size, char *fop, char *info);
+create_req (const char *loc, off_t offset, size_t size, const char *fop, char *info);
 
 void
 destroy_req (req_t *req);

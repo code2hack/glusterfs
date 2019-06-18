@@ -3,7 +3,7 @@
 
 
 req_t *
-create_req (char *loc, off_t offset, size_t size, char *fop, char *info)
+create_req (const char *loc, off_t offset, size_t size, const char *fop, char *info)
 {
     req_t *req = NULL;
     req = malloc(sizeof(req_t));

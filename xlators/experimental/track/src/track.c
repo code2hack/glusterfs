@@ -18,7 +18,19 @@
  *    Very helpful translator for debugging.
  */
 //#define TRACK_STAT_TO_STR(buf, str) track_stat_to_str (buf, str, sizeof (str))
+int
+track_lookup_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
+                  int32_t op_ret, int32_t op_errno,
+                  inode_t *inode, struct iatt *buf,
+                  dict_t *xdata, struct iatt *postparent)
+{
 
+        TRACK_STACK_UNWIND (lookup, frame, op_ret, op_errno, inode, buf,
+                            xdata, postparent);
+        return 0;
+}
+
+/*
 int
 track_entrylk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                    int32_t op_ret, int32_t op_errno, dict_t *xdata)
@@ -56,14 +68,6 @@ track_fxattrop_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                    int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
         TRACE_STACK_UNWIND (fxattrop, frame, op_ret, op_errno, xdata);
-        return 0;
-}
-
-int
-track_lookup_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
-                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
-{
-        TRACE_STACK_UNWIND (lookup, frame, op_ret, op_errno, xdata);
         return 0;
 }
 
@@ -346,6 +350,41 @@ track_lk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
         TRACE_STACK_UNWIND (lk, frame, op_ret, op_errno, xdata);
         return 0;
 }
+*/
+
+
+
+int
+track_lookup (call_frame_t *frame, xlator_t *this,
+              loc_t *loc, dict_t *xdata)
+{
+        track_conf_t *conf = NULL;
+        req_t *req = NULL;
+        conf = this->private;
+    
+        if (track_fop_names[GF_FOP_LOOKUP].enabled) {
+                char string[4096] = {0,};
+                /* TODO: print all the keys mentioned in xattr_req */
+                snprintf (string, sizeof (string),
+                          "%"PRId64": gfid=%s path=%s",
+                          frame->root->unique,
+                          uuid_utoa (loc->inode->gfid), loc->path);
+
+                frame->local = loc->inode->gfid;
+                req = create_req(loc->path,0,0,"lookup",string); 
+                rb_write_data(conf->buffer,req);
+        }
+
+        STACK_WIND (frame, track_lookup_cbk,
+                    FIRST_CHILD(this),
+                    FIRST_CHILD(this)->fops->lookup,
+                    loc, xdata);
+
+        return 0;
+}
+
+
+/*
 int
 track_entrylk (call_frame_t *frame, xlator_t *this,
                const char *volume, loc_t *loc, const char *basename,
@@ -385,8 +424,11 @@ track_inodelk (call_frame_t *frame, xlator_t *this, const char *volume,
         char         *cmd_str  = NULL;
         char         *type_str = NULL;
         track_conf_t *conf     = NULL;
+        req_t *req = NULL;
+        int ret = -1;
 
         conf = this->private;
+        
 
         if (track_fop_names[GF_FOP_INODELK].enabled) {
                 char string[4096]  = {0,};
@@ -444,10 +486,12 @@ track_inodelk (call_frame_t *frame, xlator_t *this, const char *volume,
 
                 frame->local = loc->inode->gfid;
 
+                req = create_req(loc->path,0,0,'inodelk',string);                 
                 rb_write_data(conf->buffer, create_req(loc,0,0,'inodelk',string));
+                if (ret == -1)
+                        gf_log(this,GF_WARNING,"Track buffer is full");
         }
 
-out:
         STACK_WIND (frame, track_inodelk_cbk,
                     FIRST_CHILD (this),
                     FIRST_CHILD (this)->fops->inodelk,
@@ -587,38 +631,6 @@ out:
                     FIRST_CHILD(this),
                     FIRST_CHILD(this)->fops->fxattrop,
                     fd, flags, dict, xdata);
-
-        return 0;
-}
-
-int
-track_lookup (call_frame_t *frame, xlator_t *this,
-              loc_t *loc, dict_t *xdata)
-{
-        track_conf_t *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_LOOKUP].enabled) {
-                char string[4096] = {0,};
-                /* TODO: print all the keys mentioned in xattr_req */
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s path=%s",
-                          frame->root->unique,
-                          uuid_utoa (loc->inode->gfid), loc->path);
-
-                frame->local = loc->inode->gfid;
-
-                rb_write_data(conf->buffer,create_req(loc,0,0,'lookup',string));
-        }
-
-out:
-        STACK_WIND (frame, track_lookup_cbk,
-                    FIRST_CHILD(this),
-                    FIRST_CHILD(this)->fops->lookup,
-                    loc, xdata);
 
         return 0;
 }
@@ -1742,13 +1754,11 @@ out:
                     fd, cmd, lock, xdata);
         return 0;
 }
-
+*/
 int32_t
 track_forget (xlator_t *this, inode_t *inode)
 {
-        track_conf_t   *conf = NULL;
 
-        conf = this->private;
         /* If user want to understand when a lookup happens,
            he should know about 'forget' too */
         if (track_fop_names[GF_FOP_LOOKUP].enabled) {
@@ -1756,19 +1766,15 @@ track_forget (xlator_t *this, inode_t *inode)
                 snprintf (string, sizeof (string),
                           "gfid=%s", uuid_utoa (inode->gfid));
 
-                rb_write_data(conf->buffer, create_req('',0,0,'forget',string));
+//                rb_write_data(conf->buffer, create_req('',0,0,'forget',string));
         }
 
-out:
         return 0;
 }
 
 int32_t
 track_releasedir (xlator_t *this, fd_t *fd)
 {
-        track_conf_t  *conf = NULL;
-
-        conf = this->private;
 
         if (track_fop_names[GF_FOP_OPENDIR].enabled) {
                 char   string[4096]  =  {0,};
@@ -1776,19 +1782,15 @@ track_releasedir (xlator_t *this, fd_t *fd)
                           "gfid=%s fd=%p",
                           uuid_utoa (fd->inode->gfid), fd);
 
-                rb_write_data(conf->buffer, create_req('fd',0,0,'releasedir',string));
+//                rb_write_data(conf->buffer, create_req('fd',0,0,'releasedir',string));
         }
 
-out:
         return 0;
 }
 
 int32_t
 track_release (xlator_t *this, fd_t *fd)
 {
-        track_conf_t   *conf = NULL;
-
-        conf = this->private;
 
         if (track_fop_names[GF_FOP_OPEN].enabled ||
             track_fop_names[GF_FOP_CREATE].enabled) {
@@ -1796,11 +1798,10 @@ track_release (xlator_t *this, fd_t *fd)
                 snprintf (string, sizeof (string),
                           "gfid=%s fd=%p",
                           uuid_utoa (fd->inode->gfid), fd);
-
-                rb_write_data(conf->buffer, create_req('fd',0,0,'release',string));
+//                req = create_req(NULL,0,0,string);
+//                rb_write_data(conf->buffer,req);
         }
 
-out:
         return 0;
 }
 
@@ -1828,6 +1829,7 @@ mem_acct_init (xlator_t *this)
         return ret;
 }
 
+/*
 int
 reconfigure (xlator_t *this, dict_t *options)
 {
@@ -1873,10 +1875,10 @@ reconfigure (xlator_t *this, dict_t *options)
         if (excludes)
                 process_call_list (excludes, 0);
 
-        /* Should resizing of the event-history be allowed in reconfigure?
+        * Should resizing of the event-history be allowed in reconfigure?
          * for which a new event_history might have to be allocated and the
          * older history has to be freed.
-         */
+         *
         GF_OPTION_RECONF ("log-file", conf->log_file, options, bool, out);
 
         GF_OPTION_RECONF ("log-history", conf->log_history, options, bool, out);
@@ -1886,30 +1888,45 @@ reconfigure (xlator_t *this, dict_t *options)
 out:
         return ret;
 }
+*/
 
 void _read_proc(xlator_t *this)
 {
         track_conf_t *conf = this->private;
         ring_buffer_t *buffer = conf->buffer;
         void *data= NULL;
+
         for (;;)
         {
                 if (conf->read_threads_should_die)
                         break;
-                pthread_mutex_lock(buffer->lock);
+                pthread_mutex_lock(&buffer->lock);
                 {
                         while (buffer->size_used == 0)
                                 pthread_cond_wait(&buffer->read_signal, &buffer->lock);
-                        data = rb_read_element(buffer);
+                        data = rb_read_data(buffer);
                 }
-                pthread_mutex_unlock(buffer->lock);
+                pthread_mutex_unlock(&buffer->lock);
                 /*Deal with the data here*/
-
+                buffer->destroy_buffer_data(data);
                 /*----------*/
 
         }
         return;
 }
+void _destroy_read_procs(track_conf_t *conf)
+{
+        int i;
+        conf->read_threads_should_die = true;
+        for (i=0;i<conf->threads_num;i++)
+        {
+                if (!conf->read_threads[i])
+                        continue;
+                pthread_cancel(conf->read_threads[i]);
+                pthread_join(conf->read_threads[i],NULL);
+        }
+}
+
 void _destroy_conf(track_conf_t *conf)
 {
         if(!conf)
@@ -1923,24 +1940,12 @@ void _destroy_conf(track_conf_t *conf)
         GF_FREE(conf);
         return;
 }
-void _destroy_read_procs(track_conf_t *conf)
-{
-        int i;
-        conf->read_threads_should_die = true;
-        for (i=0;i<conf->threads_num;i++)
-        {
-                if (!conf->read_threads[i])
-                        continue;
-                pthread_cancel(conf->read_threads[i]);
-                pthread_join(conf->read_threads[i]);
-        }
-}
 
 int32_t
 init (xlator_t *this)
 {
         track_conf_t    *conf = NULL;
-        dict_t *options = NULL;
+        //dict_t *options = NULL;
         size_t buff_size = TRACK_DEFAULT_BUFFER_SIZE;
         int             ret = -1;
         if (!this)
@@ -1955,16 +1960,17 @@ init (xlator_t *this)
         conf = GF_CALLOC (1, sizeof(track_conf_t), gf_track_mt_track_conf_t);
         if (!conf)
                 goto out;
-        options = this->options;
+        //options = this->options;
         /*----Buffer initialization----*/
-        GF_OPTION_INIT("buff-size",buff_size,size_t,out);
+        //GF_OPTION_INIT("buff-size",buff_size,size_t,out);
         conf->buffer = rb_buffer_new(buff_size,
                 (void (*)(void *)) &destroy_req
                 );
         if(!conf->buffer)
                 goto out;
         /*----Thread init----*/
-        GF_OPTION_INIT("threads-num", conf->threads_num, int, out);
+//        GF_OPTION_INIT("threads-num", conf->threads_num, int, out);
+        conf->threads_num = TRACK_DEFAULT_READ_THREADS;
         if (conf->threads_num > TRACK_MAX_READ_THREADS)
         {
                 gf_log(this->name,GF_LOG_ERROR,"Number of threads can not be more than %d",
@@ -1993,15 +1999,15 @@ init (xlator_t *this)
                 int i;
                 for (i = 0; i < GF_FOP_MAXVALUE; i++) {
                         if (gf_fop_list[i])
-                                strncpy (trace_fop_names[i].name,
+                                strncpy (track_fop_names[i].name,
                                          gf_fop_list[i],
-                                         sizeof (trace_fop_names[i].name));
+                                         sizeof (track_fop_names[i].name));
                         else
-                                strncpy (trace_fop_names[i].name, ":O",
-                                         sizeof (trace_fop_names[i].name));
-                        trace_fop_names[i].enabled = 1;
-                        trace_fop_names[i].name[sizeof (
-                                        trace_fop_names[i].name) - 1] = 0;
+                                strncpy (track_fop_names[i].name, ":O",
+                                         sizeof (track_fop_names[i].name));
+                        track_fop_names[i].enabled = 1;
+                        track_fop_names[i].name[sizeof (
+                                        track_fop_names[i].name) - 1] = 0;
                 }
         }
         return ret;
@@ -2025,6 +2031,7 @@ fini (xlator_t *this)
 }
 
 struct xlator_fops fops = {
+        /*
         .stat        = track_stat,
         .readlink    = track_readlink,
         .mknod       = track_mknod,
@@ -2066,6 +2073,8 @@ struct xlator_fops fops = {
         .setattr     = track_setattr,
         .fsetattr    = track_fsetattr,
         .seek        = track_seek,
+        */
+        .lookup      = track_lookup
 };
 
 struct xlator_cbks cbks = {
@@ -2099,5 +2108,4 @@ struct volume_options options[] = {
 };
 
 struct xlator_dumpops dumpops = {
-        .history = track_dump_history
 };

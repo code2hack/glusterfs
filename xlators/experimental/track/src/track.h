@@ -19,6 +19,7 @@
 #include "options.h"
 #include "ring-buff.h"
 #include "req2vec.h"
+#include "options.h"
 
 #define TRACK_DEFAULT_BUFFER_SIZE 4096
 #define TRACK_MAX_READ_THREADS 32
@@ -41,13 +42,6 @@ typedef struct track_conf {
 
 track_fop_name_t track_fop_names[GF_FOP_MAXVALUE];
 
-#define TRACK_ELEMENT(_conf, _string)                         \
-        do {                                                  \
-                if (_conf) {                                  \
-                    eh_save_history (this->history, _string); \
-                }                                             \
-        } while (0);
-
 
 
 
@@ -68,3 +62,5 @@ track_fop_name_t track_fop_names[GF_FOP_MAXVALUE];
                                         "%s", _string);                 \
                 }                                                       \
         } while (0);
+
+//void _destroy_read_procs(track_conf_t *conf);
