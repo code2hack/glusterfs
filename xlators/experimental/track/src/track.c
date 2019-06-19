@@ -1908,7 +1908,15 @@ void _read_proc(xlator_t *this)
                 }
                 pthread_mutex_unlock(&buffer->lock);
                 /*Deal with the data here*/
+                /* Convert this req to a feature vector and put it into 
+                        * temporal 'req2vec' hashtable for subsequent quering.
+                        * 
+                        *  
+                        * log buffer.
+                */
+
                 buffer->destroy_buffer_data(data);
+
                 /*----------*/
 
         }
