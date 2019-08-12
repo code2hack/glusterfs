@@ -15,12 +15,16 @@
 #include "common-utils.h"
 #include "event-history.h"
 #include "logging.h"
-#include "circ-buff.h"
 #include "statedump.h"
 #include "options.h"
+#include "options.h"
 
-#define TRACK_DEFAULT_HISTORY_SIZE 1024
-#define TRACK_DEFAULT_LOG_DIR "/logs/"
+#include "ring-buff.h"
+#include "req2vec.h"
+
+#define TRACK_MAX_READ_THREADS 32
+#define TRACK_DEFAULT_READ_THREADS 4
+
 typedef struct {
         /* Since the longest fop name is fremovexattr i.e 12 characters, array size
          * is kept 24, i.e double of the maximum.
@@ -29,23 +33,28 @@ typedef struct {
         int enabled;
 } track_fop_name_t;
 
+typedef struct track_conf {
+        ring_buffer_t *buffer;
+        /*
+        pthread_t read_threads[TRACK_MAX_READ_THREADS];
+        int threads_num;
+        bool read_threads_should_die;
+        */
+        /*----Location of log/module. The root path of mounted point is recommended----*/
+} track_conf_t;
+
 track_fop_name_t track_fop_names[GF_FOP_MAXVALUE];
 
-typedef struct {
-        gf_boolean_t log_file;
-        gf_boolean_t log_history;
-        size_t       history_size;
-        int track_log_level;
-        FILE *csv_file;
 
-} track_conf_t;
+
+
 
 #define TRACK_STACK_UNWIND(op, frame, params ...)                       \
         do {                                                            \
                 frame->local = NULL;                                    \
                 STACK_UNWIND_STRICT (op, frame, params);                \
         } while (0);
-/* 
+
 #define LOG_ELEMENT(_conf, _string)                                     \
         do {                                                            \
                 if (_conf) {                                            \
@@ -57,14 +66,4 @@ typedef struct {
                 }                                                       \
         } while (0);
 
-*/
-#define LOG_ELEMENT(_conf, _string)                                     \
-        do{                                                             \
-                if(_conf)                                               \
-                {
-                        if((_conf->log_file) == _gf_true && _conf->csv_file)    \
-                        {                                                       \
-                                fprintf(_conf->csv_file, _string);              \
-                        }                                                       \
-                }                                                               \
-        } while(0);
+//void _destroy_read_procs(track_conf_t *conf);

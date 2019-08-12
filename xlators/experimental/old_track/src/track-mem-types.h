@@ -9,13 +9,15 @@
 */
 
 
-#ifndef __TRACE_MEM_TYPES_H__
-#define __TRACE_MEM_TYPES_H__
+#ifndef __TRACK_MEM_TYPES_H__
+#define __TRACK_MEM_TYPES_H__
 
 #include "mem-types.h"
 
 enum gf_track_mem_types_ {
         gf_track_mt_track_conf_t = gf_common_mt_end + 1,
+        gf_rb_mt_ring_buff_t,
+        gf_rb_mt_element_t,
         gf_track_mt_end
 };
 #endif
