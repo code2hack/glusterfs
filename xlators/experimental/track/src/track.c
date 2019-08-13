@@ -3251,7 +3251,7 @@ init (xlator_t *this)
 
         this->history = history;
 
-        conf->track_log_level = GF_LOG_INFO;
+/*         conf->track_log_level = GF_LOG_INFO;
 
         if (dict_get (options, "force-log-level")) {
                 forced_loglevel = data_to_str (dict_get (options,
@@ -3279,6 +3279,7 @@ setloglevel:
         gf_log_set_loglevel (this->ctx, conf->track_log_level);
         this->private = conf;
         ret = 0;
+*/
 out:
         if (ret == -1) {
                 if (history)

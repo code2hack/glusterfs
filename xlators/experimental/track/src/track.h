@@ -35,7 +35,7 @@ typedef struct {
         gf_boolean_t log_file;
         gf_boolean_t log_history;
         size_t       history_size;
-        int track_log_level;
+//        int track_log_level;
         FILE *csv_file;
 
 } track_conf_t;
