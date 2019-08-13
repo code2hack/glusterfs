@@ -64,7 +64,7 @@ typedef struct {
                 {
                         if((_conf->log_file) == _gf_true && _conf->csv_file)    \
                         {                                                       \
-                                fprintf(_conf->csv_file, _string);              \
+                                fputs(_conf->csv_file, _string);              \
                         }                                                       \
                 }                                                               \
         } while(0);
