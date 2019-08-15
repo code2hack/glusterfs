@@ -1,11 +1,11 @@
 
-xlator_LTLIBRARIES = trace.la
+xlator_LTLIBRARIES = track.la
 xlatordir = $(libdir)/glusterfs/$(PACKAGE_VERSION)/xlator/experimental
 
-trace_la_LDFLAGS = -module $(GF_XLATOR_DEFAULT_LDFLAGS)
+track_la_LDFLAGS = -module $(GF_XLATOR_DEFAULT_LDFLAGS)
 
-trace_la_SOURCES = track.c
-trace_la_LIBADD = $(top_builddir)/libglusterfs/src/libglusterfs.la
+track_la_SOURCES = track.c
+track_la_LIBADD = $(top_builddir)/libglusterfs/src/libglusterfs.la
 
 noinst_HEADERS = track.h track-mem-types.h
 AM_CPPFLAGS = $(GF_CPPFLAGS) -I$(top_srcdir)/libglusterfs/src \

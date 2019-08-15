@@ -17,6 +17,7 @@
  *    their _cbk functions, which later passes the call to next layer.
  *    Very helpful translator for debugging.
  */
+
 #define TRACK_STAT_TO_STR(buf, str) track_stat_to_str (buf, str, sizeof (str))
 
 
@@ -82,41 +83,6 @@ track_create_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                   struct iatt *preparent, struct iatt *postparent,
                   dict_t *xdata)
 {
-        char          statstr[1024]       = {0, };
-        char          preparentstr[1024]  = {0, };
-        char          postparentstr[1024] = {0, };
-        track_conf_t  *conf               = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_CREATE].enabled) {
-                char  string[4096] = {0,};
-                if (op_ret >= 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        TRACK_STAT_TO_STR (preparent, preparentstr);
-                        TRACK_STAT_TO_STR (postparent, postparentstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s (op_ret=%d, fd=%p"
-                                  "*stbuf {%s}, *preparent {%s}, "
-                                  "*postparent = {%s})",
-                                  frame->root->unique,
-                                  uuid_utoa (inode->gfid), op_ret, fd,
-                                  statstr, preparentstr, postparentstr);
-
-                        /* for 'release' log */
-                        fd_ctx_set (fd, this, 0);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, op_errno=%d)",
-                                  frame->root->unique, op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (create, frame, op_ret, op_errno, fd, inode, buf,
                             preparent, postparent, xdata);
         return 0;
@@ -126,24 +92,6 @@ int
 track_open_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                 int32_t op_ret, int32_t op_errno, fd_t *fd, dict_t *xdata)
 {
-        track_conf_t      *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_OPEN].enabled) {
-                char     string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d, "
-                          "*fd=%p", frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno,
-                          fd);
-
-                LOG_ELEMENT (conf, string);
-        }
-
-out:
         /* for 'release' log */
         if (op_ret >= 0)
                 fd_ctx_set (fd, this, 0);
@@ -157,33 +105,6 @@ track_stat_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                 int32_t op_ret, int32_t op_errno, struct iatt *buf,
                 dict_t *xdata)
 {
-        char          statstr[1024] = {0, };
-        track_conf_t  *conf         = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_STAT].enabled) {
-                char string[4096] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        (void)snprintf (string, sizeof (string),
-                                        "%"PRId64": gfid=%s op_ret=%d buf=%s",
-                                        frame->root->unique,
-                                        uuid_utoa (frame->local), op_ret,
-                                        statstr);
-                } else {
-                        (void)snprintf (string, sizeof (string),
-                                        "%"PRId64": gfid=%s op_ret=%d, "
-                                        "op_errno=%d)",
-                                        frame->root->unique,
-                                        uuid_utoa (frame->local), op_ret,
-                                        op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (stat, frame, op_ret, op_errno, buf, xdata);
         return 0;
 }
@@ -194,33 +115,6 @@ track_readv_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                  int32_t count, struct iatt *buf, struct iobref *iobref,
                  dict_t *xdata)
 {
-        char          statstr[1024] = {0, };
-        track_conf_t  *conf         = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_READ].enabled) {
-                char  string[4096] = {0,};
-                if (op_ret >= 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d buf=%s",
-                                  frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  statstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d)",
-                                  frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (readv, frame, op_ret, op_errno, vector, count,
                             buf, iobref, xdata);
         return 0;
@@ -231,35 +125,6 @@ track_writev_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                   int32_t op_ret, int32_t op_errno,
                   struct iatt *prebuf, struct iatt *postbuf, dict_t *xdata)
 {
-        char         preopstr[1024]  = {0, };
-        char         postopstr[1024] = {0, };
-        track_conf_t *conf           = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_WRITE].enabled) {
-                char  string[4096] = {0,};
-                if (op_ret >= 0) {
-                        TRACK_STAT_TO_STR (prebuf, preopstr);
-                        TRACK_STAT_TO_STR (postbuf, postopstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, "
-                                  "*prebuf = {%s}, *postbuf = {%s})",
-                                  frame->root->unique, op_ret,
-                                  preopstr, postopstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d", frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (writev, frame, op_ret, op_errno, prebuf, postbuf,
                             xdata);
         return 0;
@@ -270,22 +135,6 @@ track_readdir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                    int32_t op_ret, int32_t op_errno, gf_dirent_t *buf,
                    dict_t *xdata)
 {
-        track_conf_t  *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_READDIR].enabled) {
-                char    string[4096]  = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64" : gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique, uuid_utoa (frame->local),
-                          op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (readdir, frame, op_ret, op_errno, buf, xdata);
 
         return 0;
@@ -296,37 +145,6 @@ track_readdirp_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno, gf_dirent_t *buf,
                     dict_t *xdata)
 {
-        int             count         = 0;
-        char            statstr[1024] = {0,};
-        char            string[4096]  = {0,};
-        track_conf_t   *conf          = NULL;
-        gf_dirent_t    *entry         = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_READDIRP].enabled) {
-                snprintf (string, sizeof (string),
-                          "%"PRId64" : gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique, uuid_utoa (frame->local),
-                          op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-        if (op_ret < 0)
-                goto out;
-
-        list_for_each_entry (entry, &buf->list, list) {
-                count++;
-                TRACK_STAT_TO_STR (&entry->d_stat, statstr);
-                snprintf (string, sizeof (string), "entry no. %d, pargfid=%s, "
-                          "bname=%s *buf {%s}", count, uuid_utoa (frame->local),
-                          entry->d_name, statstr);
-                LOG_ELEMENT (conf, string);
-        }
-
-out:
         TRACK_STACK_UNWIND (readdirp, frame, op_ret, op_errno, buf, xdata);
         return 0;
 }
@@ -336,36 +154,6 @@ track_fsync_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                  int32_t op_ret, int32_t op_errno,
                  struct iatt *prebuf, struct iatt *postbuf, dict_t *xdata)
 {
-        char          preopstr[1024]  = {0, };
-        char          postopstr[1024] = {0, };
-        track_conf_t  *conf           = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_FSYNC].enabled) {
-                char  string[4096] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (prebuf, preopstr);
-                        TRACK_STAT_TO_STR (postbuf, postopstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, "
-                                  "*prebuf = {%s}, *postbuf = {%s}",
-                                  frame->root->unique, op_ret,
-                                  preopstr, postopstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d", frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (fsync, frame, op_ret, op_errno, prebuf, postbuf,
                             xdata);
 
@@ -377,35 +165,6 @@ track_setattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                    int32_t op_ret, int32_t op_errno,
                    struct iatt *statpre, struct iatt *statpost, dict_t *xdata)
 {
-        char          preopstr[1024]  = {0, };
-        char          postopstr[1024] = {0, };
-        track_conf_t  *conf           = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_SETATTR].enabled) {
-                char  string[4096]  = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (statpre, preopstr);
-                        TRACK_STAT_TO_STR (statpost, postopstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, "
-                                  "*prebuf = {%s}, *postbuf = {%s})",
-                                  frame->root->unique, op_ret,
-                                  preopstr, postopstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d)", frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (setattr, frame, op_ret, op_errno, statpre,
                             statpost, xdata);
         return 0;
@@ -416,34 +175,6 @@ track_fsetattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno,
                     struct iatt *statpre, struct iatt *statpost, dict_t *xdata)
 {
-        char          preopstr[1024]  = {0, };
-        char          postopstr[1024] = {0, };
-        track_conf_t  *conf           = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_FSETATTR].enabled) {
-                char  string[4096] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (statpre, preopstr);
-                        TRACK_STAT_TO_STR (statpost, postopstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, "
-                                  "*prebuf = {%s}, *postbuf = {%s})",
-                                  frame->root->unique, op_ret,
-                                  preopstr, postopstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, op_errno=%d)",
-                                  frame->root->unique, uuid_utoa (frame->local),
-                                  op_ret, op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (fsetattr, frame, op_ret, op_errno,
                             statpre, statpost, xdata);
         return 0;
@@ -455,39 +186,6 @@ track_unlink_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                   struct iatt *preparent, struct iatt *postparent,
                   dict_t *xdata)
 {
-        char          preparentstr[1024]  = {0, };
-        char          postparentstr[1024] = {0, };
-        track_conf_t  *conf               = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_UNLINK].enabled) {
-                char string[4096] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (preparent, preparentstr);
-                        TRACK_STAT_TO_STR (postparent, postparentstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  " *preparent = {%s}, "
-                                  "*postparent = {%s})",
-                                  frame->root->unique,
-                                  uuid_utoa (frame->local),
-                                  op_ret, preparentstr,
-                                  postparentstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d)",
-                                  frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (unlink, frame, op_ret, op_errno,
                             preparent, postparent, xdata);
         return 0;
@@ -500,46 +198,6 @@ track_rename_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                   struct iatt *prenewparent, struct iatt *postnewparent,
                   dict_t *xdata)
 {
-        char           statstr[1024]          = {0, };
-        char           preoldparentstr[1024]  = {0, };
-        char           postoldparentstr[1024] = {0, };
-        char           prenewparentstr[1024]  = {0, };
-        char           postnewparentstr[1024] = {0, };
-        track_conf_t   *conf                  = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_RENAME].enabled) {
-                char  string[6044] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        TRACK_STAT_TO_STR (preoldparent, preoldparentstr);
-                        TRACK_STAT_TO_STR (postoldparent, postoldparentstr);
-                        TRACK_STAT_TO_STR (prenewparent, prenewparentstr);
-                        TRACK_STAT_TO_STR (postnewparent, postnewparentstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, "
-                                  "*stbuf = {%s}, *preoldparent = {%s},"
-                                  " *postoldparent = {%s}"
-                                  " *prenewparent = {%s}, "
-                                  "*postnewparent = {%s})",
-                                  frame->root->unique, op_ret, statstr,
-                                  preoldparentstr, postoldparentstr,
-                                  prenewparentstr, postnewparentstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d", frame->root->unique,
-                                  uuid_utoa (frame->local),
-                                  op_ret, op_errno);
-
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (rename, frame, op_ret, op_errno, buf,
                             preoldparent, postoldparent,
                             prenewparent, postnewparent, xdata);
@@ -551,34 +209,6 @@ track_readlink_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno,
                     const char *buf, struct iatt *stbuf, dict_t *xdata)
 {
-        char          statstr[1024] = {0, };
-        track_conf_t  *conf         = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_READLINK].enabled) {
-                char string[4096] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (stbuf, statstr);
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, op_errno=%d,"
-                                  "buf=%s, stbuf = { %s })",
-                                  frame->root->unique, op_ret, op_errno,
-                                  buf, statstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d",
-                                  frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (readlink, frame, op_ret, op_errno, buf, stbuf,
                             xdata);
         return 0;
@@ -590,44 +220,6 @@ track_lookup_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                   inode_t *inode, struct iatt *buf,
                   dict_t *xdata, struct iatt *postparent)
 {
-        char          statstr[1024]       = {0, };
-        char          postparentstr[1024] = {0, };
-        track_conf_t  *conf               = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_LOOKUP].enabled) {
-                char  string[4096] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        TRACK_STAT_TO_STR (postparent, postparentstr);
-                        /* print buf->ia_gfid instead of inode->gfid,
-                         * since if the inode is not yet linked to the
-                         * inode table (fresh lookup) then null gfid
-                         * will be printed.
-                         */
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s (op_ret=%d "
-                                  "*buf {%s}, *postparent {%s}",
-                                  frame->root->unique,
-                                  uuid_utoa (buf->ia_gfid),
-                                  op_ret, statstr, postparentstr);
-
-                        /* For 'forget' */
-                        inode_ctx_put (inode, this, 0);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d)",
-                                  frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (lookup, frame, op_ret, op_errno, inode, buf,
                             xdata, postparent);
         return 0;
@@ -640,39 +232,6 @@ track_symlink_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                    struct iatt *preparent, struct iatt *postparent,
                    dict_t *xdata)
 {
-        char          statstr[1024]       = {0, };
-        char          preparentstr[1024]  = {0, };
-        char          postparentstr[1024] = {0, };
-        track_conf_t  *conf               = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_SYMLINK].enabled) {
-                char  string[4096] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        TRACK_STAT_TO_STR (preparent, preparentstr);
-                        TRACK_STAT_TO_STR (postparent, postparentstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s (op_ret=%d "
-                                  "*stbuf = {%s}, *preparent = {%s}, "
-                                  "*postparent = {%s})",
-                                  frame->root->unique,
-                                  uuid_utoa (inode->gfid),
-                                  op_ret, statstr, preparentstr,
-                                  postparentstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": op_ret=%d, op_errno=%d",
-                                  frame->root->unique, op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (symlink, frame, op_ret, op_errno, inode, buf,
                             preparent, postparent, xdata);
         return 0;
@@ -684,39 +243,6 @@ track_mknod_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                  inode_t *inode, struct iatt *buf,
                  struct iatt *preparent, struct iatt *postparent, dict_t *xdata)
 {
-        char          statstr[1024]       = {0, };
-        char          preparentstr[1024]  = {0, };
-        char          postparentstr[1024] = {0, };
-        track_conf_t  *conf               = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        char string[4096]  = {0,};
-        if (track_fop_names[GF_FOP_MKNOD].enabled) {
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        TRACK_STAT_TO_STR (preparent, preparentstr);
-                        TRACK_STAT_TO_STR (postparent, postparentstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s (op_ret=%d "
-                                  "*stbuf = {%s}, *preparent = {%s}, "
-                                  "*postparent = {%s})",
-                                  frame->root->unique,
-                                  uuid_utoa (inode->gfid),
-                                  op_ret, statstr, preparentstr,
-                                  postparentstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, op_errno=%d)",
-                                  frame->root->unique, op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (mknod, frame, op_ret, op_errno, inode, buf,
                             preparent, postparent, xdata);
         return 0;
@@ -728,39 +254,6 @@ track_mkdir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                  inode_t *inode, struct iatt *buf,
                  struct iatt *preparent, struct iatt *postparent, dict_t *xdata)
 {
-        char          statstr[1024]       = {0, };
-        char          preparentstr[1024]  = {0, };
-        char          postparentstr[1024] = {0, };
-        track_conf_t  *conf               = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_MKDIR].enabled) {
-                char  string[4096]  = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        TRACK_STAT_TO_STR (preparent, preparentstr);
-                        TRACK_STAT_TO_STR (postparent, postparentstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s (op_ret=%d "
-                                  ", *stbuf = {%s}, *prebuf = {%s}, "
-                                  "*postbuf = {%s} )",
-                                  frame->root->unique,
-                                  uuid_utoa (inode->gfid),
-                                  op_ret, statstr, preparentstr,
-                                  postparentstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, op_errno=%d)",
-                                  frame->root->unique, op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (mkdir, frame, op_ret, op_errno, inode, buf,
                             preparent, postparent, xdata);
         return 0;
@@ -772,39 +265,6 @@ track_link_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                 inode_t *inode, struct iatt *buf,
                 struct iatt *preparent, struct iatt *postparent, dict_t *xdata)
 {
-        char          statstr[1024]       = {0, };
-        char          preparentstr[1024]  = {0, };
-        char          postparentstr[1024] = {0, };
-        track_conf_t  *conf               = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        char  string[4096]  = {0,};
-        if (track_fop_names[GF_FOP_LINK].enabled) {
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        TRACK_STAT_TO_STR (preparent, preparentstr);
-                        TRACK_STAT_TO_STR (postparent, postparentstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, "
-                                  "*stbuf = {%s},  *prebuf = {%s},"
-                                  " *postbuf = {%s})",
-                                  frame->root->unique, op_ret,
-                                  statstr, preparentstr, postparentstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d",
-                                  frame->root->unique,
-                                  uuid_utoa (frame->local),
-                                  op_ret, op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (link, frame, op_ret, op_errno, inode, buf,
                             preparent, postparent, xdata);
         return 0;
@@ -814,22 +274,6 @@ int
 track_flush_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                  int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t   *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        char      string[4096] = {0,};
-        if (track_fop_names[GF_FOP_FLUSH].enabled) {
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique, uuid_utoa (frame->local),
-                          op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (flush, frame, op_ret, op_errno, xdata);
         return 0;
 }
@@ -838,23 +282,6 @@ int
 track_opendir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                    int32_t op_ret, int32_t op_errno, fd_t *fd, dict_t *xdata)
 {
-        track_conf_t   *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        char    string[4096] = {0,};
-        if (track_fop_names[GF_FOP_OPENDIR].enabled) {
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d,"
-                          " fd=%p",
-                          frame->root->unique, uuid_utoa (frame->local),
-                          op_ret, op_errno, fd);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         /* for 'releasedir' log */
         if (op_ret >= 0)
                 fd_ctx_set (fd, this, 0);
@@ -868,36 +295,6 @@ track_rmdir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                  int32_t op_ret, int32_t op_errno,
                  struct iatt *preparent, struct iatt *postparent, dict_t *xdata)
 {
-        char           preparentstr[1024]  = {0, };
-        char           postparentstr[1024] = {0, };
-        track_conf_t   *conf               = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_RMDIR].enabled) {
-                char  string[4096] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (preparent, preparentstr);
-                        TRACK_STAT_TO_STR (postparent, postparentstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "*prebuf={%s},  *postbuf={%s}",
-                                  frame->root->unique,
-                                  uuid_utoa (frame->local),
-                                  op_ret, preparentstr, postparentstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d", frame->root->unique,
-                                  uuid_utoa (frame->local),
-                                  op_ret, op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (rmdir, frame, op_ret, op_errno,
                             preparent, postparent, xdata);
         return 0;
@@ -908,35 +305,6 @@ track_truncate_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno,
                     struct iatt *prebuf, struct iatt *postbuf, dict_t *xdata)
 {
-        char           preopstr[1024]  = {0, };
-        char           postopstr[1024] = {0, };
-        track_conf_t   *conf           = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_TRUNCATE].enabled) {
-                char   string[4096] = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (prebuf, preopstr);
-                        TRACK_STAT_TO_STR (postbuf, postopstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, "
-                                  "*prebuf = {%s}, *postbuf = {%s} )",
-                                  frame->root->unique, op_ret,
-                                  preopstr, postopstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d", frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (truncate, frame, op_ret, op_errno, prebuf,
                             postbuf, xdata);
         return 0;
@@ -947,42 +315,6 @@ track_statfs_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                   int32_t op_ret, int32_t op_errno, struct statvfs *buf,
                   dict_t *xdata)
 {
-        track_conf_t  *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_STATFS].enabled) {
-                char   string[4096] = {0,};
-                if (op_ret == 0) {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": ({f_bsize=%lu, "
-                                  "f_frsize=%lu, "
-                                  "f_blocks=%"GF_PRI_FSBLK
-                                  ", f_bfree=%"GF_PRI_FSBLK", "
-                                  "f_bavail=%"GF_PRI_FSBLK", "
-                                  "f_files=%"GF_PRI_FSBLK", "
-                                  "f_ffree=%"GF_PRI_FSBLK", "
-                                  "f_favail=%"GF_PRI_FSBLK", "
-                                  "f_fsid=%lu, f_flag=%lu, "
-                                  "f_namemax=%lu}) => ret=%d",
-                                  frame->root->unique, buf->f_bsize,
-                                  buf->f_frsize, buf->f_blocks,
-                                  buf->f_bfree, buf->f_bavail,
-                                  buf->f_files, buf->f_ffree,
-                                  buf->f_favail, buf->f_fsid,
-                                  buf->f_flag, buf->f_namemax, op_ret);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": (op_ret=%d, "
-                                  "op_errno=%d)",
-                                  frame->root->unique, op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (statfs, frame, op_ret, op_errno, buf, xdata);
         return 0;
 }
@@ -991,23 +323,6 @@ int
 track_setxattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t     *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_SETXATTR].enabled) {
-                char      string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret,
-                          op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (setxattr, frame, op_ret, op_errno, xdata);
         return 0;
 }
@@ -1017,23 +332,6 @@ track_getxattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno, dict_t *dict,
                     dict_t *xdata)
 {
-        track_conf_t    *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_GETXATTR].enabled) {
-                char       string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d,"
-                          " dict=%p", frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno,
-                          dict);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (getxattr, frame, op_ret, op_errno, dict, xdata);
 
         return 0;
@@ -1043,22 +341,6 @@ int
 track_fsetxattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                      int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t   *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-                goto out;
-        if (track_fop_names[GF_FOP_FSETXATTR].enabled) {
-                char    string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (fsetxattr, frame, op_ret, op_errno, xdata);
         return 0;
 }
@@ -1068,23 +350,6 @@ track_fgetxattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                      int32_t op_ret, int32_t op_errno, dict_t *dict,
                      dict_t *xdata)
 {
-        track_conf_t    *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_FGETXATTR].enabled) {
-                char      string[4096]  = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d,"
-                          " dict=%p", frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno,
-                          dict);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (fgetxattr, frame, op_ret, op_errno, dict, xdata);
 
         return 0;
@@ -1094,22 +359,6 @@ int
 track_removexattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                        int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t  *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_REMOVEXATTR].enabled) {
-                char       string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (removexattr, frame, op_ret, op_errno, xdata);
 
         return 0;
@@ -1119,22 +368,6 @@ int
 track_fsyncdir_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t     *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_FSYNCDIR].enabled) {
-                char       string[4096]   =  {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (fsyncdir, frame, op_ret, op_errno, xdata);
         return 0;
 }
@@ -1143,22 +376,6 @@ int
 track_access_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                   int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t   *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_ACCESS].enabled) {
-                char      string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, "
-                          "op_errno=%d)", frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (access, frame, op_ret, op_errno, xdata);
         return 0;
 }
@@ -1168,35 +385,6 @@ track_ftruncate_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                      int32_t op_ret, int32_t op_errno,
                      struct iatt *prebuf, struct iatt *postbuf, dict_t *xdata)
 {
-        char          prebufstr[1024]  = {0, };
-        char          postbufstr[1024] = {0, };
-        track_conf_t  *conf            = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_FTRUNCATE].enabled) {
-                char  string[4096]  = {0,};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (prebuf, prebufstr);
-                        TRACK_STAT_TO_STR (postbuf, postbufstr);
-
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": op_ret=%d, "
-                                  "*prebuf = {%s}, *postbuf = {%s} )",
-                                  frame->root->unique, op_ret,
-                                  prebufstr, postbufstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d", frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (ftruncate, frame, op_ret, op_errno, prebuf, postbuf,
                             xdata);
         return 0;
@@ -1206,32 +394,6 @@ int
 track_fstat_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                  int32_t op_ret, int32_t op_errno, struct iatt *buf, dict_t *xdata)
 {
-        char          statstr[1024] = {0, };
-        track_conf_t  *conf         = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_FSTAT].enabled) {
-                char string[4096]  = {0.};
-                if (op_ret == 0) {
-                        TRACK_STAT_TO_STR (buf, statstr);
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d "
-                                  "buf=%s", frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  statstr);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d", frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (fstat, frame, op_ret, op_errno, buf, xdata);
         return 0;
 }
@@ -1241,36 +403,6 @@ track_lk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
               int32_t op_ret, int32_t op_errno, struct gf_flock *lock,
               dict_t *xdata)
 {
-        track_conf_t   *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_LK].enabled) {
-                char      string[4096] = {0,};
-                if (op_ret == 0) {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "{l_type=%d, l_whence=%d, "
-                                  "l_start=%"PRId64", "
-                                  "l_len=%"PRId64", l_pid=%u})",
-                                  frame->root->unique,
-                                  uuid_utoa (frame->local),
-                                  op_ret, lock->l_type, lock->l_whence,
-                                  lock->l_start, lock->l_len,
-                                  lock->l_pid);
-                } else {
-                        snprintf (string, sizeof (string),
-                                  "%"PRId64": gfid=%s op_ret=%d, "
-                                  "op_errno=%d)", frame->root->unique,
-                                  uuid_utoa (frame->local), op_ret,
-                                  op_errno);
-                }
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (lk, frame, op_ret, op_errno, lock, xdata);
         return 0;
 }
@@ -1279,22 +411,6 @@ int
 track_entrylk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                    int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t  *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_ENTRYLK].enabled) {
-                char   string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (entrylk, frame, op_ret, op_errno, xdata);
         return 0;
 }
@@ -1303,22 +419,6 @@ int
 track_fentrylk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t    *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_FENTRYLK].enabled) {
-                char      string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (fentrylk, frame, op_ret, op_errno, xdata);
         return 0;
 }
@@ -1328,22 +428,6 @@ track_xattrop_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                    int32_t op_ret, int32_t op_errno, dict_t *dict,
                    dict_t *xdata)
 {
-        track_conf_t  *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_XATTROP].enabled) {
-                char    string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (xattrop, frame, op_ret, op_errno, dict, xdata);
         return 0;
 }
@@ -1353,22 +437,6 @@ track_fxattrop_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno, dict_t *dict,
                     dict_t *xdata)
 {
-        track_conf_t    *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_FXATTROP].enabled) {
-                char      string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (fxattrop, frame, op_ret, op_errno, dict, xdata);
         return 0;
 }
@@ -1377,22 +445,6 @@ int
 track_inodelk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                    int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t   *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_INODELK].enabled) {
-                char       string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local),op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (inodelk, frame, op_ret, op_errno, xdata);
         return 0;
 }
@@ -1401,22 +453,6 @@ int
 track_finodelk_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                     int32_t op_ret, int32_t op_errno, dict_t *xdata)
 {
-        track_conf_t   *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-		goto out;
-        if (track_fop_names[GF_FOP_FINODELK].enabled) {
-                char      string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d, op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-out:
         TRACK_STACK_UNWIND (finodelk, frame, op_ret, op_errno, xdata);
         return 0;
 }
@@ -1427,23 +463,6 @@ track_rchecksum_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                      uint32_t weak_checksum, uint8_t *strong_checksum,
                      dict_t *xdata)
 {
-        track_conf_t   *conf = NULL;
-
-        conf = this->private;
-
-        if (!conf->log_file && !conf->log_history)
-                goto out;
-        if (track_fop_names[GF_FOP_RCHECKSUM].enabled) {
-                char      string[4096] = {0,};
-                snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s op_ret=%d op_errno=%d",
-                          frame->root->unique,
-                          uuid_utoa (frame->local), op_ret, op_errno);
-
-                LOG_ELEMENT (conf, string);
-        }
-
-out:
         TRACK_STACK_UNWIND (rchecksum, frame, op_ret, op_errno, weak_checksum,
                             strong_checksum, xdata);
 
@@ -1723,9 +742,8 @@ track_lookup (call_frame_t *frame, xlator_t *this,
                 char string[4096] = {0,};
                 /* TODO: print all the keys mentioned in xattr_req */
                 snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s path=%s",
-                          frame->root->unique,
-                          uuid_utoa (loc->inode->gfid), loc->path);
+                          "lookup: path=%s\n",
+                          loc->path);
 
                 frame->local = loc->inode->gfid;
 
@@ -2260,10 +1278,9 @@ track_open (call_frame_t *frame, xlator_t *this, loc_t *loc,
         if (track_fop_names[GF_FOP_OPEN].enabled) {
                 char      string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s path=%s flags=%d fd=%p",
-                          frame->root->unique,
-                          uuid_utoa (loc->inode->gfid), loc->path,
-                          flags, fd);
+                          "open: path=%s flags=%d\n",
+                          loc->path,
+                          flags);
 
                 frame->local = loc->inode->gfid;
 
@@ -2572,9 +1589,8 @@ track_opendir (call_frame_t *frame, xlator_t *this, loc_t *loc, fd_t *fd,
         if (track_fop_names[GF_FOP_OPENDIR].enabled) {
                 char   string[4096]  =  {0,};
                 snprintf (string, sizeof (string),
-                          "%"PRId64": gfid=%s path=%s fd=%p",
-                          frame->root->unique,
-                          uuid_utoa (loc->inode->gfid), loc->path, fd);
+                          "opendir: path=%s fd=%p",
+                          loc->path, fd);
 
                 frame->local = loc->inode->gfid;
 
@@ -2613,6 +1629,7 @@ track_readdirp (call_frame_t *frame, xlator_t *this, fd_t *fd, size_t size,
                 LOG_ELEMENT (conf, string);
         }
 
+//        frame->local = fd->inode->gfid;
 out:
         STACK_WIND (frame, track_readdirp_cbk,
                     FIRST_CHILD(this),
@@ -3153,9 +2170,9 @@ init (xlator_t *this)
 {
         dict_t *options = NULL;
         char *includes = NULL, *excludes = NULL;
-        char *forced_loglevel = NULL;
-        char *csv_log_file_path = TRACK_DEFAULT_LOG_DIR;
-        char *csv_log_file_name = NULL;
+//        char *forced_loglevel = NULL;
+//        char *csv_filepath = TRACK_DEFAULT_LOG_DIR;
+        char *csv_filename = NULL;
         eh_t *history = NULL;
         int  ret = -1;
         size_t  history_size = TRACK_DEFAULT_HISTORY_SIZE;
@@ -3231,16 +2248,17 @@ init (xlator_t *this)
         gf_log (this->name, GF_LOG_DEBUG, "logging to history %s",
                 (conf->log_history == _gf_true)?"enabled":"disabled");
         /*options for csv log file*/
-        GF_OPTION_INIT("csv-filename", csv_log_file_name,str, out);
-        strcat(csv_log_file_path, csv_log_file_name);
-        conf->csv_file = fopen(csv_log_file_path,"a");
+        GF_OPTION_INIT("csv-filename", csv_filename,str, out);
+//        strcat(csv_filepath, csv_filename);
+//        conf->csv_file = fopen(csv_filepath,"a");
+        conf->csv_file = fopen("/root/track_test/log.csv","a");
         if(!conf->csv_file)
         {
                 gf_log(this->name, GF_LOG_ERROR,"log file open failed\n");
                 goto out;
         }
 
-        gf_log(this->name,GF_LOG_DEBUG,"logging to file:/logs/%s",conf->csv_filename);
+        gf_log(this->name,GF_LOG_DEBUG,"logging to file:/root/track_test/%s",csv_filename);
 
         history = eh_new (history_size, _gf_false, NULL);
         if (!history) {
@@ -3251,7 +2269,8 @@ init (xlator_t *this)
 
         this->history = history;
 
-/*         conf->track_log_level = GF_LOG_INFO;
+        /*
+        conf->track_log_level = GF_LOG_INFO;
 
         if (dict_get (options, "force-log-level")) {
                 forced_loglevel = data_to_str (dict_get (options,
@@ -3261,8 +2280,8 @@ init (xlator_t *this)
 
                 if (strcmp (forced_loglevel, "INFO") == 0)
                         conf->track_log_level = GF_LOG_INFO;
-                else if (strcmp (forced_loglevel, "TRACK") == 0)
-                        conf->track_log_level = GF_LOG_TRACK;
+                else if (strcmp (forced_loglevel, "TRACE") == 0)
+                        conf->track_log_level = GF_LOG_TRACE;
                 else if (strcmp (forced_loglevel, "ERROR") == 0)
                         conf->track_log_level = GF_LOG_ERROR;
                 else if (strcmp (forced_loglevel, "DEBUG") == 0)
@@ -3277,9 +2296,10 @@ init (xlator_t *this)
 
 setloglevel:
         gf_log_set_loglevel (this->ctx, conf->track_log_level);
+        */
         this->private = conf;
         ret = 0;
-*/
+        
 out:
         if (ret == -1) {
                 if (history)
@@ -3379,7 +2399,7 @@ struct volume_options options[] = {
         //csv log file options
         { .key  = {"csv-filename"},
           .type = GF_OPTION_TYPE_STR,
-          .default_value = "/logs/log.csv",
+          .default_value = "log.csv",
         },
 
 

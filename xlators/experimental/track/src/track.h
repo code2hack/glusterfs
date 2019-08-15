@@ -61,10 +61,11 @@ typedef struct {
 #define LOG_ELEMENT(_conf, _string)                                     \
         do{                                                             \
                 if(_conf)                                               \
-                {
+                {                                                               \
                         if((_conf->log_file) == _gf_true && _conf->csv_file)    \
                         {                                                       \
-                                fputs(_conf->csv_file, _string);              \
+                                puts(_string);                            \
+                                fputs(_string,_conf->csv_file);              \
                         }                                                       \
                 }                                                               \
         } while(0);
