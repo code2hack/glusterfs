@@ -11,12 +11,20 @@ static int
 display_info(const char *fpath, const struct stat *sb,
              int tflag, struct FTW *ftwbuf)
 {
+    char path_replace[4096];
+    strcpy(path_replace,fpath);
+    for(int i=0;i<strlen(path_replace);i++)
+    {
+        if(path_replace[i] == '/')
+            path_replace[i] = ' ';
+    }
     if(!file)
     {
         printf("File fail\n");
         return 1;
     }
-    fprintf(file,"%s\n",fpath);
+    fputs(path_replace,file);
+    fputc('\n',file);
     /* 
     printf("%-3s %2d %7jd   %-40s %d %s\n",
            (tflag == FTW_D) ? "d" : (tflag == FTW_DNR) ? "dnr" : (tflag == FTW_DP) ? "dp" : (tflag == FTW_F) ? "f" : (tflag == FTW_NS) ? "ns" : (tflag == FTW_SL) ? "sl" : (tflag == FTW_SLN) ? "sln" : "???",
