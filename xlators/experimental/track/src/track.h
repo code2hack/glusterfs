@@ -64,7 +64,6 @@ typedef struct {
                 {                                                               \
                         if((_conf->log_file) == _gf_true && _conf->csv_file)    \
                         {                                                       \
-                                puts(_string);                            \
                                 fputs(_string,_conf->csv_file);              \
                         }                                                       \
                 }                                                               \

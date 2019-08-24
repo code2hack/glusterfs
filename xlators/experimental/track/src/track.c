@@ -1958,15 +1958,16 @@ out:
                     fd, cmd, lock, xdata);
         return 0;
 }
-
+/*
 int32_t
 track_forget (xlator_t *this, inode_t *inode)
 {
         track_conf_t   *conf = NULL;
 
         conf = this->private;
-        /* If user want to understand when a lookup happens,
-           he should know about 'forget' too */
+        // If user want to understand when a lookup happens,
+           he should know about 'forget' too 
+
         if (!conf->log_file && !conf->log_history)
 		goto out;
         if (track_fop_names[GF_FOP_LOOKUP].enabled) {
@@ -1980,7 +1981,9 @@ track_forget (xlator_t *this, inode_t *inode)
 out:
         return 0;
 }
+*/
 
+/*
 int32_t
 track_releasedir (xlator_t *this, fd_t *fd)
 {
@@ -2002,7 +2005,9 @@ track_releasedir (xlator_t *this, fd_t *fd)
 out:
         return 0;
 }
+*/
 
+/*
 int32_t
 track_release (xlator_t *this, fd_t *fd)
 {
@@ -2025,6 +2030,7 @@ track_release (xlator_t *this, fd_t *fd)
 out:
         return 0;
 }
+*/
 
 
 void
@@ -2368,11 +2374,10 @@ struct xlator_fops fops = {
         .fsetattr    = track_fsetattr,
         .seek        = track_seek,
 };
-
 struct xlator_cbks cbks = {
-        .release     = track_release,
-        .releasedir  = track_releasedir,
-        .forget      = track_forget,
+//        .release     = track_release,
+//        .releasedir  = track_releasedir,
+//        .forget      = track_forget,
 };
 
 struct volume_options options[] = {
